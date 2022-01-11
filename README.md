@@ -5,7 +5,7 @@
 
 A tensorflow implementation of Nvidia's paper "Audio-Driven Facial Animation by Joint End-to-End Learning of Pose and Emotion".
 
-In this paper, the output is vertices ,but we change it to the blendshapes' weights that according to Model rigging.
+In the orginal paper above, the output is vextex , our version that we've changed it to the blendshapes' weights.
 
 ## Base Module
 ---
