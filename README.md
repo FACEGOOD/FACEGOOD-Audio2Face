@@ -35,14 +35,14 @@ the data for train is stored in dataSet1
 
 In folder /test,we supply a test application named AiSpeech.
 wo provide a pretrained model,zsmeif.pb
-In floder /example/ueExample,we provide a packaged ue project that contains a digit human created by FACEGOOD can drived by /AiSpeech/zsmeif.py.
+In floder /example/ueExample, we provide a packaged ue project that contains a digit human created by FACEGOOD can drived by /AiSpeech/zsmeif.py.
 
-you can followd the below steps to use it:
-1.  make sure you have the microphone and connected it to computer.
+you can follow the steps below to use it:
+1.  make sure you connect the microphone to computer.
 2.  run the script in terminal. 
     > python zsmeif.py
-3.  when the terminal show the message "run main",please run FaceGoodLiveLink.exe is placed in /example/ueExample/ folder.
-4.  click and hold on the left mouse button on the screen in UE project ,then you can talk with the AI and wait for the voice and animation response. 
+3.  when the terminal show the message "run main", please run FaceGoodLiveLink.exe which is placed in /example/ueExample/ folder.
+4.  click and hold on the left mouse button on the screen in UE project, then you can talk with the AI model and wait for the voice and animation response. 
 
 
 ## Dependences
@@ -59,7 +59,7 @@ python-libs:
 ## Data
 ---
 
-the testing data,Maya model,and ue4 test project can be downloaded from the link below.
+The testing data, Maya model, and ue4 test project can be downloaded from the link below.
 
 [data_all](https://pan.baidu.com/s/1CGSzn639PUE7cUYnX4I3fQ) code : n6ty
 
