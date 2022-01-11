@@ -1,0 +1,88 @@
+{
+    "aispeech":{
+        "version":"0.0.1"
+    },
+    "config":{
+        "print":true,
+        "session":10000,
+        "fps":30,
+        "server":{"ip":"127.0.0.1","port":43015},
+        "client":{"ip":"127.0.0.1","port":43014},
+        "ue4":{"recv_size":1024,"begin":"1","end":"2"},
+        "tensorflow":{"cpu":2,"frames":20}
+    },
+    "api_key":{
+        "productId":"914008290",
+        "publicKey":"c315edc2bab941cbae6a3591a06281bc",
+        "secretKey":"81D620703D63A63A200AEB94125FBAFB",
+        "productIdChat":"914008349",
+        "speaker":"zsmeif"
+    },
+    "api_token":{
+        "description":"调用API时的Token，用来验证请求的合法性",
+        "always_updated":true,
+        "ok":"200",
+        "url":"https://api.tgenie.cn/api/v2/public/authToken",
+        "format":"json",
+        "http_method":"POST",
+        "token":"f1ebc3cc-3199-4f8c-ad78-c730b1b44f48"
+    },
+    "api_websocket":{
+        "description":"语音识别Websocket接口",
+        "speech_text":"speech_text",
+        "url":"ws://api.tgenie.cn/runtime/v3/recognize?",
+        "res":"aicallcenter",
+        "productId":"914008290",
+        "token":"a616baa5-c203-4b0f-8cd0-1cd7418d734d",
+
+        "request_body_first": {"asr":{"res": "aicallcenter","lmld":"FESTIVAL_1122b_BA914008290_LM","enablePunctuation": true,"language": "zh-CN"},
+                "audio": {"audioType": "wav","sampleRate": 16000,"channel": 1,"sampleBytes":2},
+                "dialog":{"productId":914008290}
+                },
+        "request_body_second":"file",
+        "request_body_third":""
+
+    },
+    "api_asr":{
+        "description":"语音识别接口",
+        "speech_text":"speech_text",
+        "url":"https://api.tgenie.cn/portal/api/v1/ba/asr",
+        "format":"json",
+        "http_method":"POST",
+        "session":"1"
+
+    },
+    "api_ba":{
+        "description":"会话接口",
+        "text_text":"text_text",
+        "url":"https://api.tgenie.cn/api/v1/ba",
+        "format":"json",
+        "http_method":"POST",
+        "session":"1"
+    },
+    "api_tts":{
+        "description":"语音合成接口.TTS提供语音声音类型:specker",
+        "text_speed":"text_speed",
+        "url":"https://api.tgenie.cn/api/v1/tts",
+        "format":"json",
+        "http_method":"POST",
+        "audio_type":"wav",
+        "sample_rate":"16000",
+        "channel":"1",
+        "sample_bytes":"2",
+        "specker":"zsmeif"
+    },
+    "specker_zsmeif":{
+        "TimbreDescription": "知性大方小美",
+        "voiceId": "zsmeif",
+        "Tonelabel": "女声-自然",
+        "language": "中英混"
+    },
+    "specker_lchuam":{
+        "TimbreDescription": "成熟深沉大川",
+        "voiceId": "lchuam",
+        "Tonelabel": "男-自然",
+        "language": "中英混"
+    }
+
+}
