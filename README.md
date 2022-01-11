@@ -27,6 +27,9 @@ Preprocess the wav to 2d data.
 
 ### train
 
+we recommand that uses FACEGOOD avatary to produces trainning data.its fast and accurate.
+http://www.avatary.com
+
 the data for train is stored in dataSet1 
 
 > python step14_train.py --epochs 8 --dataSet dataSet1
