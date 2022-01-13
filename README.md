@@ -36,8 +36,8 @@ the data for train is stored in dataSet1
 
 ### test
 
-In folder /test,we supply a test application named AiSpeech.
-wo provide a pretrained model,zsmeif.pb
+In folder /test,we supply a test application named AiSpeech.  
+wo provide a pretrained model,zsmeif.pb  
 In floder /example/ueExample, we provide a packaged ue project that contains a digit human created by FACEGOOD can drived by /AiSpeech/zsmeif.py.
 
 you can follow the steps below to use it:
