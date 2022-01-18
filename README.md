@@ -5,9 +5,8 @@
 ![ue](rsc/ue.png)
 
 
-A tensorflow implementation of Nvidia's paper "Audio-Driven Facial Animation by Joint End-to-End Learning of Pose and Emotion".
+We create a project that transforms audio to blendshape weights,and drives the digital human,xiaomei,in UE project.
 
-In the orginal paper above, the output is vextex , our version that we've changed it to the blendshapes' weights.
 
 ## Base Module
 ---
@@ -16,14 +15,16 @@ In the orginal paper above, the output is vextex , our version that we've change
 
 ![figure2](rsc/layers.png)
 
-We use the framework introduced in [Audio-Driven Facial Animation by Joint End-to-End Learning of Pose and Emotion] and the same loss functions,but used the blendshapes' weights instead of vertices.
+
+The framework we used contains three parts.In Formant network step,we perform fixed-function analysis of the input audio clip.In the articulation network,we concatenate an emotional state vector to the output of each convolution layer after the ReLU activation. The fully-connected layers at the end expand the 256+E abstract features to  blendshape weights .
+
 
 ## Usage
 ---
 ![pipeline](/rsc/pipeline.PNG)
 
 
-this pipeline show how we use FACEGOOD Audio2Face.
+this pipeline shows how we use FACEGOOD Audio2Face.
 
 
 
