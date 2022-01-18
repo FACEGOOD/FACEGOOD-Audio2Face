@@ -2,6 +2,8 @@
 
 ## Discription
 ---
+![ue](rsc/ue.png)
+
 
 A tensorflow implementation of Nvidia's paper "Audio-Driven Facial Animation by Joint End-to-End Learning of Pose and Emotion".
 
@@ -10,13 +12,29 @@ In the orginal paper above, the output is vextex , our version that we've change
 ## Base Module
 ---
 
-![network](rsc/net.png)
-![network2](rsc/layers.png)
+![figure1](rsc/net.png)
+
+![figure2](rsc/layers.png)
 
 We use the framework introduced in [Audio-Driven Facial Animation by Joint End-to-End Learning of Pose and Emotion] and the same loss functions,but used the blendshapes' weights instead of vertices.
 
 ## Usage
 ---
+![pipeline](/rsc/pipeline.PNG)
+
+
+this pipeline show how we use FACEGOOD Audio2Face.
+
+
+
+[Test video](https://www.youtube.com/watch?v=f6DcsZCsOWM&ab_channel=MicrosoftDeveloper)
+
+### Prepare data
+
+- step1: record voice and video ,and create animation from video in maya.
+    note: the voice must contain vowel ,exaggerated talking and normal talking.Dialogue covers as many pronunciations as possible.
+- step2: we deal the voice with LPC,to split the voice into segment frames corresponding  to the animation frames in maya.
+
 
 ### Input data
 
