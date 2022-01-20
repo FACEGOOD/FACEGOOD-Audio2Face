@@ -97,6 +97,11 @@ The testing data, Maya model, and ue4 test project can be downloaded from the li
 
 
 ![fgcode](rsc/fgcode.JPG)
+
+Wechat: FACEGOOD_CHINA
+
+
+
 ## License
 
 Audio2Face Core is released under the terms of the MIT license.See COPYING for more information or see https://opensource.org/licenses/MIT.
