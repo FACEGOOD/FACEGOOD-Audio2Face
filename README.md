@@ -93,6 +93,10 @@ The testing data, Maya model, and ue4 test project can be downloaded from the li
 ---
 [Audio-Driven Facial Animation by Joint End-to-End Learning of Pose and Emotion](chrome-extension://oemmndcbldboiebfnladdacbdfmadadm/https://research.nvidia.com/sites/default/files/publications/karras2017siggraph-paper_0.pdf)
 
+## Contact
+
+
+![fgcode](rsc/fgcode.JPG)
 ## License
 
 Audio2Face Core is released under the terms of the MIT license.See COPYING for more information or see https://opensource.org/licenses/MIT.
