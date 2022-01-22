@@ -1,5 +1,8 @@
 # Audio2Face
 
+## Notice
+   The Test part and  The UE project for xiaomei created by FACEGOOD  is not available for commercial use.they are for testing purposes only.
+
 ## Discription
 ---
 ![ue](rsc/ue.png)
