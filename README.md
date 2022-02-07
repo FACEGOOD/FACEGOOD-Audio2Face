@@ -1,4 +1,4 @@
-# Audio2Face
+# Voice2Face
 
 ## Notice
    The Test part and  The UE project for xiaomei created by FACEGOOD  is not available for commercial use.they are for testing purposes only.
@@ -27,7 +27,7 @@ The framework we used contains three parts.In Formant network step,we perform fi
 ![pipeline](/rsc/pipeline.PNG)
 
 
-this pipeline shows how we use FACEGOOD Audio2Face.
+this pipeline shows how we use FACEGOOD Voice2Face.
 
 
 
@@ -110,4 +110,4 @@ Discord:  https://discord.gg/V46y6uTdw8
 
 ## License
 
-Audio2Face Core is released under the terms of the MIT license.See COPYING for more information or see https://opensource.org/licenses/MIT.
+Voice2Face Core is released under the terms of the MIT license.See COPYING for more information or see https://opensource.org/licenses/MIT.
