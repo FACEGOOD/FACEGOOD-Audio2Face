@@ -16,7 +16,7 @@
 import numpy as np
 import os
 
-project_dir = r'D:\audio2bs\shirley_1119'
+project_dir = r'D:\voice2face\shirley_1119'
 bs_name = np.load(os.path.join(project_dir,'shirley_1119_bs_name.npy'))
 dataSet_dir = os.path.join(project_dir,'dataSet16')
 

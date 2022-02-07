@@ -23,7 +23,7 @@ from step1_LPC import audioProcess
 import math
 
 ########## 加载路径 ##########
-project_dir = r'D:\audio2bs\shirley_1119'
+project_dir = r'D:\voice2face\shirley_1119'
 
 # wav_path = os.path.join(project_dir,'wav','1015_3_16.wav')
 # print(wav_path)

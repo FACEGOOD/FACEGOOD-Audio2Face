@@ -21,7 +21,7 @@ import scipy.io.wavfile as wavfile
 from ctypes import *
 # import time
 
-project_dir = r'D:\audio2bs\shirley_1119'
+project_dir = r'D:\voice2face\shirley_1119'
 dll = cdll.LoadLibrary(os.path.join(project_dir,'LPC.dll'))
 # wav_path = os.path.join(project_dir,'wav','1015_2_01.wav') #音频路径
 # save_path = os.path.join(project_dir,'lpc','lpc_1015_2_01.npy') #保存LPC处理后的数组

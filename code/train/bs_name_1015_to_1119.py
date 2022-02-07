@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 
-shirley_1015_bs_name = np.load(r'D:\audio2bs\shirley_1015\shirley_1015_bs_name.npy')
-shirley_1119_bs_name = np.load(r'D:\audio2bs\shirley_1015\shirley_1119_bs_name.npy')
-shirley_1119_bs_name316 = np.load(r'D:\audio2bs\shirley_1119\shirley_1119_bs_name316.npy')
-bs_value_1114_3_16 = np.load(r'D:\audio2bs\shirley_1119\bs_value\bs_value_1114_3_16.npy')
+shirley_1015_bs_name = np.load(r'D:\voice2face\shirley_1015\shirley_1015_bs_name.npy')
+shirley_1119_bs_name = np.load(r'D:\voice2face\shirley_1015\shirley_1119_bs_name.npy')
+shirley_1119_bs_name316 = np.load(r'D:\voice2face\shirley_1119\shirley_1119_bs_name316.npy')
+bs_value_1114_3_16 = np.load(r'D:\voice2face\shirley_1119\bs_value\bs_value_1114_3_16.npy')
 
 print(bs_value_1114_3_16.shape)
 
@@ -16,7 +16,7 @@ for i in range(len(bs_name_index)):
 # 导出权重的csv文件
 import pandas as pd
 df = pd.DataFrame(weights1,columns=shirley_1119_bs_name)
-df.to_csv(r'D:\audio2bs\shirley_1119\1.csv',index=0)
+df.to_csv(r'D:\voice2face\shirley_1119\1.csv',index=0)
 
 # print(len(shirley_1015_bs_name))
 # print(len(shirley_1119_bs_name))
