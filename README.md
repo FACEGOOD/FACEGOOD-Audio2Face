@@ -99,14 +99,11 @@ The testing data, Maya model, and ue4 test project can be downloaded from the li
 ## Contact
 
 
-![fgcode](rsc/fgcode.JPG)
+<img src="rsc/fgcode.JPG" width = "200" height = "200" alt="" align=center />
 
 Wechat: FACEGOOD_CHINA  
 Email：support@facegood.cc  
-Discord:  https://discord.gg/V46y6uTdw8  
-
-
-
+Discord: https://discord.gg/V46y6uTdw8
 
 ## License
 
