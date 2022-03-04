@@ -72,7 +72,7 @@ you can follow the steps below to use it:
 
 ## Dependences
 
-tersorflow-gpu 1.15
+tersorflow-gpu 1.15  cuda 10.0 
 
 python-libs:
     pyaudio
@@ -80,6 +80,7 @@ python-libs:
     websocket
     websocket-client
 
+note: test can run with cpu.
 
 ## Data
 ---
