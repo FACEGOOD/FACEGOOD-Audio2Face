@@ -15,15 +15,20 @@
 
 import maya.cmds as cmds
 import numpy as np
+
+#select model
 selectList = cmds.ls(selection=True)
 attri = cmds.listConnections(selectList[0])
 
+#set blendshape group name
 shapeSetName = 'blendShape1' #shapesBS
+#get all the animation curve which type is animCurveTU
 bs_nameSet = cmds.listConnections(shapeSetName,type='animCurveTU')
 
 
 DataMap =[[]]
 
+#set the frame range to export
 timeStart = 0
 timeEnd = 2
 
