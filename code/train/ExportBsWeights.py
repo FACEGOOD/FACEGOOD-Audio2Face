@@ -17,30 +17,37 @@ import maya.cmds as cmds
 import numpy as np
 
 #select model
-selectList = cmds.ls(selection=True)
-attri = cmds.listConnections(selectList[0])
+#selectList = cmds.ls(selection=True)
+#attri = cmds.listConnections(selectList[0])
 
 #set blendshape group name
-shapeSetName = 'blendShape1' #shapesBS
+shapeSetName = 'FgBlendShape' #shapesBS
 #get all the animation curve which type is animCurveTU
-bs_nameSet = cmds.listConnections(shapeSetName,type='animCurveTU')
+#bs_nameSet = cmds.listConnections(shapeSetName,type='animCurveTU')
+blendAttrSize = cmds.getAttr(shapeSetName+'.weight')
+bs_nameSet=[]
+for i in range(len(blendAttrSize[0])):
+    attrName = 'FgBlendShape.weight'+'['+str(i)+']'
+    aname =cmds.aliasAttr(attrName,q=True)
+    bs_nameSet.append(aname)
 
+print(bs_nameSet)
 
-DataMap =[[]]
+DataMap =[]
 
 #set the frame range to export
 timeStart = 0
 timeEnd = 2
 
 for i in range(timeStart,timeEnd):
+    print("frame:"+str(i))
     cmds.currentTime(i)
     rowData_temp=[]
     for nameStr in bs_nameSet:
-        nameStr = nameStr.replace('_','.',1)
+        nameStr = shapeSetName+'.'+nameStr#nameStr.replace('_','.',1)
         a = cmds.getAttr(nameStr)
         rowData_temp.append(a)
     print(len(rowData_temp))
     DataMap.append(rowData_temp)
-
 np.save(r'BS_name.npy',bs_nameSet)
 np.save(r'BS_value.npy',DataMap)
