@@ -31,8 +31,8 @@ this pipeline shows how we use FACEGOOD Audio2Face.
 
 
 
-[Test video](https://www.youtube.com/watch?v=f6DcsZCsOWM&ab_channel=MicrosoftDeveloper)
-[Test video](https://www.youtube.com/watch?v=bvT9yg3Uab4)
+[Test video 1](https://www.youtube.com/watch?v=f6DcsZCsOWM&ab_channel=MicrosoftDeveloper)
+[Test video 2](https://www.youtube.com/watch?v=bvT9yg3Uab4)
 Ryan Yun from columbia.edu
 
 
