@@ -1,6 +1,11 @@
 # Audio2Face
 
+## 读取本地文件
+
+运行`zsmeif_test.py`，其他步骤相同
+
 ## Notice
+
    The Test part and  The UE project for xiaomei created by FACEGOOD  is not available for commercial use.they are for testing purposes only.
 
 ## Description

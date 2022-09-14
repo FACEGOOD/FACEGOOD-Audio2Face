@@ -192,18 +192,17 @@ if __name__ == "__main__":
 
     dm_tts = ai.dm_tts(text = "你是谁？")
     
-    dm_tts.status_code
-    dm_tts
 
     chat_text = ai.chat(text="你是谁？")
 
     b_wav_data = ai.tts(text = chat_text)
 
-    text_self = "您好！我是子书美，来自数字虚拟世界。我可以告诉你你想知道的一切，想与我面对面聊天吗？12月5日到8日来第十届中国国际新媒体短片节找我！"
-    b_wav_data = ai.tts(text = text_self,speaker = "lchuam")
+    text_self = "您好！我是子书美，来自数字虚拟世界。我可以告诉你你想知道的一切，想与我面对面聊天吗！快来找我吧！"
+    dm_tts_data = ai.dm_tts(text = text_self)
+    b_wav_data = ai.tts(text = text_self)
 
     import wave
-    wav_path = "G:/test.wav"
+    wav_path = "F:/test.wav"
     f = open(wav_path,"wb")
     f.write(b_wav_data)
     f.close()
