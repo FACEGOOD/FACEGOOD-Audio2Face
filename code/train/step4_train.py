@@ -39,8 +39,11 @@ tf.app.flags.DEFINE_string('dataSet', 'dataSet1', 'dataSet name')
 epoch = FLAGS.epochs
 dataSet = FLAGS.dataSet
 
-project_dir = r'D:\voice2face\shirley_1119'
-data_dir = os.path.join(project_dir,dataSet)
+project_dir = '/home/shaomingqi/projects/facegood'
+dataSet = 'dataSet1'
+epoch = 10
+
+data_dir = os.path.join(os.path.join(project_dir,'DataForAudio2Bs/train/'),dataSet)
 
 x_train = np.load(os.path.join(data_dir,'train_data.npy'))
 y_train = np.load(os.path.join(data_dir,'train_label_var.npy'))

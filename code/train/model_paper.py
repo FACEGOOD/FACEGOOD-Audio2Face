@@ -16,6 +16,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 def net(input_data, outputSize, keep_pro):
     E = 16
     conv1 = tf.layers.conv2d(inputs=input_data,filters=72,kernel_size=[3, 1],padding="same",activation=tf.nn.relu,strides=[2,1])
