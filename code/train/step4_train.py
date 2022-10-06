@@ -40,8 +40,8 @@ epoch = FLAGS.epochs
 dataSet = FLAGS.dataSet
 
 project_dir = '/home/shaomingqi/projects/facegood'
-dataSet = 'dataSet1'
-epoch = 10
+dataSet = 'dataSet5'
+epoch = 16
 
 data_dir = os.path.join(os.path.join(project_dir,'DataForAudio2Bs/train/'),dataSet)
 

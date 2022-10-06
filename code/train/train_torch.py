@@ -3,8 +3,8 @@ import torch
 from model_torch import *
 from torch.utils.data import Dataset,DataLoader,TensorDataset
 import os
-epochs = 10
-dataSet = 'dataSet1'
+epochs = 16
+dataSet = 'dataSet5'
 project_dir = '/home/shaomingqi/projects/facegood'
 data_dir = os.path.join(os.path.join(project_dir,'DataForAudio2Bs/train/'),dataSet)
 logs_dir = os.path.join(project_dir,'logs')
@@ -74,7 +74,7 @@ def train():
 
     # Save Checkpoint
     chckpt_path = os.path.join(logs_dir,'model_torch_{0}.pth'.format(epochs))
-    torch.save(model,chckpt_path)
+    torch.save(model.state_dict(),chckpt_path)
 
 
 

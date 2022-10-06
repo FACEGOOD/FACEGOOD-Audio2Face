@@ -83,7 +83,7 @@ bs_name_index = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11, 13, 14, 15, 16, 17, 18, 
                  104, 106, 107, 108, 109, 110, 111, 112, 113, 114, 1, 115]
 
 BS_CONUNT = 116
-pbfile_path = join(package_path, '0317_dataSet5_var_epoch16_22075.pb')
+pbfile_path = join(package_path, 'model_torch_16.pth')
 print(pbfile_path)
 CPU_Thread = AiSpeechConfig['config']['tensorflow']['cpu']
 CPU_Frames = AiSpeechConfig['config']['tensorflow']['frames']
@@ -94,10 +94,16 @@ import numpy as np
 
 from lib.audio.api_audio import AudioRecognition, AudioPlay
 from lib.tensorflow.input_wavdata_output_lpc import c_lpc, get_audio_frames
-from lib.tensorflow.input_lpc_output_weight import WeightsAnimation
+import torch
+from model_torch import net_torch
+weight_model = net_torch(outputSize=37, keep_pro=0.0)
+weight_model.load_state_dict(torch.load(pbfile_path,map_location=torch.device('cpu')))
 
-pb_weights_animation = WeightsAnimation(pbfile_path)
-get_weight = pb_weights_animation.get_weight
+def get_weight(input_lpc):
+    x = torch.from_numpy(input_lpc).float()
+    x = torch.permute(x, (0, 3, 1, 2))
+    outputs,_ = weight_model(x)
+    return outputs.detach().numpy()
 
 
 
@@ -106,7 +112,7 @@ def worker(q_input, q_output, i):
     while True:
         input_data = q_input.get()
         for output_wav in input_data:
-            output_lpc = c_lpc(output_wav)
+            output_lpc = c_lpc(output_wav) # 20 32 64 1
             output_data = get_weight(output_lpc) # (20,37)
             print(output_data)
             # 赋值
