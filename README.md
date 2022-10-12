@@ -90,6 +90,8 @@ note: test can run with cpu.
 
 The testing data, Maya model, and ue4 test project can be downloaded from the link below.
 
+the index of dataset 4-16 is for trainning.
+
 [data_all](https://pan.baidu.com/s/1CGSzn639PUE7cUYnX4I3fQ) code : n6ty
 
 [GoogleDrive](https://drive.google.com/drive/folders/1r7b7sfMebhtG0NSZk1yHzMaHRosb8xd1?usp=sharing)
