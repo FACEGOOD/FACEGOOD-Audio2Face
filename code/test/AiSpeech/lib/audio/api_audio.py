@@ -25,10 +25,24 @@ class MyCustomWarning(UserWarning):
     pass
 
 
+'''
+AudioPlay : play audio file or data.
+use pyaudio module to play audio data,and can running in threads.
+该类主要用于音频播放
+'''
+
+
 class AudioPlay:
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 16000
+
+    '''
+        play audio file.播放音频文件
+        param:
+            filename : the file path
+            chunk : chunk size
+    '''
 
     def play_wav_file(self, filename, chunk=1024):
         wf = wave.open(filename, 'rb')
@@ -52,9 +66,12 @@ class AudioPlay:
         wf.close()
         p.terminate()
 
+    '''
+        play audio data.播放音频数据
+        param:
+            audio_data : audio datas
+    '''
     def play_audio_data(self, audio_data):
-        # f = wave.open(wav_file, 'rb')
-        # string audio_data = f.readframes(all nframes) 
         p = pyaudio.PyAudio()
         stream = p.open(format=self.FORMAT,
                         channels=self.CHANNELS,
@@ -66,6 +83,11 @@ class AudioPlay:
         stream.close()
         p.terminate()
 
+    '''
+        play audio file in thread.
+        在线程中播放音频文件        
+    '''
+
     def play_wav_file_thread(self, *args, **kwargs):
         thread = threading.Thread(target=self.play_wav_file,
                                   args=args,
@@ -74,6 +96,11 @@ class AudioPlay:
         thread.start()
         return thread
 
+    '''
+        play audio data in thread.
+        在线程中播放音频数据
+    '''
+
     def play_audio_data_thread(self, *args, **kwargs):
         thread = threading.Thread(target=self.play_audio_data,
                                   args=args,
@@ -81,6 +108,12 @@ class AudioPlay:
         thread.daemon = True
         thread.start()
         return thread
+
+
+'''
+this class is used to Recording sounds or get audio data from microphone.
+该类主要用于音频录制
+'''
 
 
 class AudioRecognition(object):
@@ -100,9 +133,17 @@ class AudioRecognition(object):
                 input=True,
                 frames_per_buffer=CHUNK)
 
+    '''
+        recording CHUNK size data form stream
+        获取CHUNK size长度的音频数据
+    '''
     def recording(self):
         return  self.stream.read(self.CHUNK)
     
+    '''
+        recording seconds data from stream
+        获取参数规定的秒数音频数据
+    '''
     def record(self,RECORD_SECONDS):
         frames = []
 
@@ -111,6 +152,13 @@ class AudioRecognition(object):
             frames.append(data)
         return frames
 
+    '''
+        save audio data to file
+        保存音频文件
+        param:
+            frames: audio frames data
+            wav_file : save wav path
+    '''
     def save_data_to_file(self,frames, wav_file):
         wf = wave.open(wav_file, 'wb')
         wf.setnchannels(self.CHANNELS)

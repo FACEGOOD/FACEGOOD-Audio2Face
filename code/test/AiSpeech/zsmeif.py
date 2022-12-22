@@ -1,9 +1,25 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+
+# Copyright 2021 The FACEGOOD Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
+
 """
     AiSpeech/main.py
     ~~~~~
-
     :copyright:facegood © 2019 by the tang.
 
 """
@@ -17,8 +33,9 @@ import json
 # *******************************************
 package_path = "./"
 
-# speakers = ["zsmeif", "lchuam"]
+# speakers = ["zsmeif"]
 # *******************************************
+# load config file
 path_aispeech_config = join(package_path,"zsmeif_aispeech_config.json")
 try:
     with codecs.open(path_aispeech_config, 'r', 'utf-8-sig') as fconfig:
@@ -30,7 +47,7 @@ except Exception as err:
 
 
 # *******************************************
-
+# read parsing config data
 productId = AiSpeechConfig['api_key']['productId']
 publicKey = AiSpeechConfig['api_key']['publicKey']
 secretkey = AiSpeechConfig['api_key']['secretKey']
@@ -49,7 +66,7 @@ SPEED_PLAY = float(1.0 / FPS)
 # *******************************************
 # *******************************************
 import lib.socket.ue4_socket as ue4
-
+# read udp server and client config data
 ADDR_BIND = (AiSpeechConfig['config']['server']['ip'],AiSpeechConfig['config']['server']['port'])
 ADDR_SEND = (AiSpeechConfig['config']['client']['ip'],AiSpeechConfig['config']['client']['port'])
 
@@ -84,17 +101,21 @@ from lib.audio.api_audio import AudioRecognition, AudioPlay
 from lib.tensorflow.input_wavdata_output_lpc import c_lpc, get_audio_frames
 from lib.tensorflow.input_lpc_output_weight import WeightsAnimation
 
-
+#load tensorflow pb model file
 pb_weights_animation = WeightsAnimation(pbfile_path)
 get_weight = pb_weights_animation.get_weight
 
 # *******************************************
+# work thread function
+# use to deal with audio data to lpc data ,and input lpc data to get weights.
 def worker(q_input, q_output, i):
     print("the cpus number is:", i)
     while True:
         input_data = q_input.get()
         for output_wav in input_data:
+            # audio frame to lpc datas
             output_lpc = c_lpc(output_wav)
+            #lpc data to weights
             output_data = get_weight(output_lpc)
             # 赋值
             weights = np.zeros((output_data.shape[0],BS_CONUNT))
@@ -114,6 +135,12 @@ def worker(q_input, q_output, i):
 import threading
 from queue import Queue
 
+
+'''
+    mutli thread deal with audio to weights
+
+'''
+
 class SoundAnimation:
     def __init__(self,cpus = 1,input_nums = 30):
         self.cpus = cpus
@@ -125,6 +152,7 @@ class SoundAnimation:
         if self.flag_start:
             self.stop_multiprocessing()
 
+    # init  threads
     def init_multiprocessing(self):
         self.q_input = [Queue() for i in range(0, self.cpus)]
         self.q_output = [Queue() for i in range(0, self.cpus)]
@@ -133,16 +161,19 @@ class SoundAnimation:
             self.process.append(
                 threading.Thread(target=worker, args=(self.q_input[i], self.q_output[i], i)))
 
+    #start threads
     def start_multiprocessing(self):
         self.flag_start = True
         for i in range(0, self.cpus):
             self.process[i].setDaemon(True)
             self.process[i].start()
-
+    
+    #stop threads
     def stop_multiprocessing(self):
         for i in range(0, self.cpus):
             self.process[i].terminate()
-
+    
+    #input audio frame data
     def input_frames_data(self, input_date):
         input_data_nums = [input_date[i:i + self.input_nums] for i in range(0, len(input_date), self.input_nums)]
         self.flag_nums = len(input_data_nums)
@@ -170,14 +201,22 @@ from lib.aispeech.api_aispeech import AiSpeech
 from lib.aispeech.api_websocket import AiSpeechWebSocket
 
 
+'''
+    main function is a work process.
+
+
+'''
+
 def main(fun_socket_send):
     #**********************************************#
     # token 过期时间
+    # check if token is expired
     expireTime = aispeech.update_token()
     if not aispeech.token:
         print("Eerrr: get token, please wait a moment")
         exit(1)
     url = WSURL + aispeech.token
+    #init ars websocket
     asr_websocket = AiSpeechWebSocket(url,request_body_json)
     expireTimeSecs = 300
 
@@ -191,29 +230,29 @@ def main(fun_socket_send):
             asr_websocket.url = WSURL + aispeech.token
         time.sleep(0.01)
 
+        #if click button is hold in ue project
         while ue4.RECORDING:
-            # 1 asr
+            # 1 asr create connection with AiSpeech
             num = 0
             flag = asr_websocket.ws_asr_create_connection(timeout=20)
             if not flag:
                 print("ERROR: Could not create connection:",url)
                 exit()
+            #send audio data to get text
             asr_websocket.send_ws_asr_data(send_status=1)
-            # Nero  test
-            
-#            buf = []
-            
-            
             while ue4.RECORDING:
                 if info_print:
                     print("Recording:",num)
                 num += 1
                 buf=record.recording()
                 asr_websocket.send_ws_asr_data(data = buf,send_status=2)
+                # this will break when recording is end
+            # send finish status 
             asr_websocket.send_ws_asr_data(send_status=3)
             if info_print:
                 print("wait get asr:")
                 get_time = time.time()
+            # get answer text from asr
             text = asr_websocket.get_text_from_ws_asr()
             if info_print:
                 print("asr time:",time.time()-get_time)
@@ -225,6 +264,7 @@ def main(fun_socket_send):
                         print("asr:",text_asr)
                         print("wait get tts:")
                         dm_tts_time = time.time()
+                    #answer text to audio data
                     dm_tts = aispeech.dm_tts(url=BA_URL,text=text_asr,speaker= SPEAKER)
                     if info_print:
                         print("tts time is:",time.time()-dm_tts_time)
@@ -234,8 +274,10 @@ def main(fun_socket_send):
                             # 4 animation
                             def play_audio_animation():
                                 voice = np.frombuffer(b_wav_data[44:], dtype=np.int16)
+                                #audio data to frames
                                 input_data = get_audio_frames(voice)
                                 try:
+                                    #input audio data to get weights data
                                     sound_animation.input_frames_data(input_data)
                                     is_first = True
                                     f_num = 0
@@ -243,6 +285,7 @@ def main(fun_socket_send):
                                     for weight in sound_animation.yield_output_data():
                                         f_num += 1
                                         # f_time = time.time()
+                                        #play audio and send weights data at the same time
                                         if is_first:
                                             player.play_audio_data_thread(b_wav_data[44:])
                                             f_btime = time.time()

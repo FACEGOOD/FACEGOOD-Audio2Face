@@ -9,6 +9,13 @@
 from websocket import create_connection
 import threading
 
+
+"""
+this class is used to translate audio data to text.In order to achieve this function,
+we also use th Speech's remote service.
+该类主要用于语音识别，将语音转换成对应的文本。
+"""
+
 class AiSpeechWebSocket:
     def __init__(self,url, request_body):
         self.url = url
@@ -20,6 +27,13 @@ class AiSpeechWebSocket:
         # if self.ws:
         #     self.close_iat_asr()
 
+    '''
+    create connection with remote server
+    与云端服务器建立连接
+    params:
+        timeout: time for wait
+        enable_multithread : if enable multi thread to create connection.
+    '''
     def ws_asr_create_connection(self,timeout=5,enable_multithread = True):
         try:
             self.ws = create_connection(self.url,timeout=timeout, enable_multithread=enable_multithread)
@@ -28,6 +42,14 @@ class AiSpeechWebSocket:
             print("ERROR:", err)
             return False
 
+
+    '''
+        send audio data to remote server
+        发送语音数据
+        params:
+            data ：audio data
+            send_status : if send_status = 1, is json format data. else if send_status = 2 ,is binary data.
+    '''
     def send_ws_asr_data(self, data=b'', send_status=0):
         flag = None
         if send_status == 2:
@@ -38,10 +60,21 @@ class AiSpeechWebSocket:
             flag = self.ws.send_binary("")
         return flag
 
+    '''
+        get text from remote server
+        获取语音对应的文本
+        return text
+    '''
+
     def get_text_from_ws_asr(self):
         # while True:
         message = self.ws.recv()
         return message
+
+    '''
+        close the remote connection
+        关闭连接
+    '''
 
     def close_ws_asr(self):
         self.ws.close()

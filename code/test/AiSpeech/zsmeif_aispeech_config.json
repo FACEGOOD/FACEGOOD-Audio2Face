@@ -77,12 +77,5 @@
         "voiceId": "zsmeif",
         "Tonelabel": "女声-自然",
         "language": "中英混"
-    },
-    "specker_lchuam":{
-        "TimbreDescription": "成熟深沉大川",
-        "voiceId": "lchuam",
-        "Tonelabel": "男-自然",
-        "language": "中英混"
     }
-
 }

@@ -17,8 +17,8 @@ import numpy as np
 import os
 
 project_dir = r'D:\voice2face\shirley_1119'
-bs_name = np.load(os.path.join(project_dir,'shirley_1119_bs_name.npy'))
-dataSet_dir = os.path.join(project_dir,'dataSet16')
+bs_name = np.load(os.path.join(project_dir, 'shirley_1119_bs_name.npy'))
+dataSet_dir = os.path.join(project_dir, 'dataSet16')
 
 # 参与训练的数据
 # name_list = ['1_01','1_02','2_01','2_02','2_03','2_04'] #dataSet1
@@ -35,30 +35,31 @@ dataSet_dir = os.path.join(project_dir,'dataSet16')
 # name_list = ['1_01','1_02','2_01','2_02','2_03','2_04','3_15','3_16'] #dataSet12：修改后的1_01、1_02、2_01、2_02和2_04
 # name_list = ['1_01','1_02','2_01','2_02','2_03','2_04'] #dataSet11：修改后的1_01、1_02、2_01、2_02和2_04；删除单音节和词语一半的0帧
 # name_list = ['1_01','1_02','2_01','2_02','2_03','2_04','3_15','3_16'] #dataSet12：修改后的1_01、1_02、2_01、2_02和2_04；删除单音节和词语一半的0帧
-name_list = ['1_01','1_02','2_01','2_02','2_03','2_04','2_05','3_15','3_16'] #dataSet16：all_付
+name_list = ['1_01', '1_02', '2_01', '2_02', '2_03', '2_04', '2_05', '3_15', '3_16']  # dataSet16：all_付
 
-
-data_path_list = [os.path.join(project_dir,'lpc','lpc_1114_' + i + '.npy') for i in name_list]
-label_path_list = [os.path.join(project_dir,'bs_value','bs_value_1114_' + i + '.npy') for i in name_list]
-
+data_path_list = [os.path.join(project_dir, 'lpc', 'lpc_1114_' + i + '.npy') for i in name_list]
+label_path_list = [os.path.join(project_dir, 'bs_value', 'bs_value_1114_' + i + '.npy') for i in name_list]
 
 data = np.zeros((1, 32, 64, 1))
 label = np.zeros((1, 116))
+
+# 处理 data
 for i in range(len(data_path_list)):
-	data_temp = np.load(data_path_list[i]) 
-	label_temp = np.load(label_path_list[i])
+    data_temp = np.load(data_path_list[i])
+    label_temp = np.load(label_path_list[i])
 
-	if data_path_list[i][-8] == '1' or data_path_list[i][-8] == '2':
-		label_temp_sum = label_temp.sum(axis=1)
-		zero_index = np.where(label_temp_sum == 0)[0]
-		half_zero_index = [zero_index[i] for i in range(0,len(zero_index),2)]
-		select_index = [i for i in range(label_temp.shape[0]) if i not in half_zero_index]
+    # '1_01', '1_02', '2_01', '2_02', '2_03', '2_04', '2_05'
+    if data_path_list[i][-8] == '1' or data_path_list[i][-8] == '2':
+        label_temp_sum = label_temp.sum(axis=1)
+        zero_index = np.where(label_temp_sum == 0)[0]
+        half_zero_index = [zero_index[i] for i in range(0, len(zero_index), 2)]
+        select_index = [i for i in range(label_temp.shape[0]) if i not in half_zero_index]
 
-		data_temp = data_temp[select_index]
-		label_temp = label_temp[select_index]
+        data_temp = data_temp[select_index]
+        label_temp = label_temp[select_index]
 
-	data = np.vstack((data,data_temp))
-	label = np.vstack((label,label_temp))
+    data = np.vstack((data, data_temp))
+    label = np.vstack((label, label_temp))
 
 data = data[1:]
 label = label[1:]
@@ -125,24 +126,30 @@ print(label.shape)
 # const_bs_value = [0.,-0.,0.,-0.,0.,-0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-0.,-0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-0.,0.,-0.,0.,-0.,0.,-0.,0.,0.,-0.,0.,-0.,0.,-0.,0.,-0.,0.,-0.,0.,0.]
 
 # bs_name_1015_v2
-const_bs_index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 39, 46, 47, 48, 49, 50, 55, 56, 61, 62, 65, 70, 71, 72, 73, 83, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]
-var_bs_index = [10, 13, 14, 15, 18, 33, 38, 40, 41, 42, 43, 44, 45, 51, 52, 53, 54, 57, 58, 59, 60, 63, 64, 66, 67, 68, 69, 74, 75, 76, 77, 78, 79, 80, 81, 82, 84]
-const_bs_value = [0.,0.,-0.,0.,-0.,0.,-0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-0.,-0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,-0.,0.,-0.,0.,-0.,0.,-0.,0.,0.,-0.,0.,-0.,0.,-0.,0.,-0.,0.,-0.,0.]
+const_bs_index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                  34, 35, 36, 37, 39, 46, 47, 48, 49, 50, 55, 56, 61, 62, 65, 70, 71, 72, 73, 83, 85, 86, 87, 88, 89,
+                  90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+                  112, 113, 114, 115]
+var_bs_index = [10, 13, 14, 15, 18, 33, 38, 40, 41, 42, 43, 44, 45, 51, 52, 53, 54, 57, 58, 59, 60, 63, 64, 66, 67, 68,
+                69, 74, 75, 76, 77, 78, 79, 80, 81, 82, 84]
+const_bs_value = [0., 0., -0., 0., -0., 0., -0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                  0., -0., -0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                  0., 0., 0., 0., 0., 0., 0., 0., 0., 0., -0., 0., -0., 0., -0., 0., -0., 0., 0., -0., 0., -0., 0., -0.,
+                  0., -0., 0., -0., 0.]
 
 # 保存训练数据
 train_data = data
 val_data = data[-1000:]
-train_label_var = label[:,var_bs_index]
-val_label_var = label[-1000:,var_bs_index]
+train_label_var = label[:, var_bs_index]
+val_label_var = label[-1000:, var_bs_index]
 
 print(train_data.shape)
 print(val_data.shape)
 print(train_label_var.shape)
 print(val_label_var.shape)
 
-np.save(os.path.join(dataSet_dir,'train_data.npy'),train_data)
-np.save(os.path.join(dataSet_dir,'val_data.npy'),val_data)
-np.save(os.path.join(dataSet_dir,'train_label_var.npy'),train_label_var)
-np.save(os.path.join(dataSet_dir,'val_label_var.npy'),val_label_var)
-
-
+# 保存为 np 数据格式
+np.save(os.path.join(dataSet_dir, 'train_data.npy'), train_data)
+np.save(os.path.join(dataSet_dir, 'val_data.npy'), val_data)
+np.save(os.path.join(dataSet_dir, 'train_label_var.npy'), train_label_var)
+np.save(os.path.join(dataSet_dir, 'val_label_var.npy'), val_label_var)

@@ -9,12 +9,15 @@ import os
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 from tensorflow.python.platform import gfile
-
-# gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-# for gpu in gpus:
-#     tf.config.experimental.set_memory_growth(gpu, True)
-
+'''
+该类主要是调用tensorflow 加载训练好的算法模型，输入音频数据输出动画表情权重。
+this class load trained model and predict weights.
+'''
 class WeightsAnimation:
+    '''
+        在_init__中对模型文件进行加载，并在initdata 中构建输入输出函数句柄。
+        init tensorflow enviroment and load graph.
+    '''
     def __init__(self, pb_path):
         self.sess = tf.Session()
         with gfile.FastGFile(pb_path, 'rb') as f:
@@ -32,6 +35,12 @@ class WeightsAnimation:
             'Placeholder:0')
         self.out = self.sess.graph.get_tensor_by_name('dense_1/BiasAdd:0')
 
+    '''
+        get_weight: predict weights
+        params: 
+            data:  lpc data
+            return : facial expression weights
+    '''
 
     def get_weight(self, data):
         weight = self.sess.run(self.out,

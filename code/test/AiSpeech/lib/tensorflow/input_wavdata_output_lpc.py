@@ -2,24 +2,30 @@
 """
     sound_animation/lib.input_wavdata_output_lpc
     ~~~~~
-
-
-
     :copyright:facegood © 2019 by the tang.
 
 """
 import os
 from ctypes import *
 import numpy as np
-# current_path = os.path.abspath(__file__)
-# dll_path_win = os.path.join(
-#     os.path.abspath(os.path.dirname(current_path) + os.path.sep + "."),
-#     'LPC.dll')
+
+'''
+    load LPC.dll dynamically
+'''
 dll_path_win = "./lib/tensorflow/LPC.dll"
 dll_path_linux = dll_path_win.replace('\\', '/')
 dll = cdll.LoadLibrary(dll_path_linux)
 LPC = dll.LPC
 
+'''
+get_audio_frames:
+    this function separate audio data to audio frame datas.
+    params:
+        audio_data: audio data,bytes.
+        rate : 16000 is default,this is sample rate.
+        frames_per_second : default 30, frames per second.
+        chunks_length :default 260. according to the theory
+'''
 
 def get_audio_frames(audio_data, rate=16000, frames_per_second = 30,chunks_length = 260):
     # 取得音频文件采样频率
@@ -45,7 +51,22 @@ def get_audio_frames(audio_data, rate=16000, frames_per_second = 30,chunks_lengt
 
     return audio_frames
 
+'''
+c_lpc:
+    make the audio frame datas to lpc datas.
+    For the audio frame data, perform linear 
+    predictive coding (Linear Predictive Coding, LPC) 
+    to extract the first K autocorrelation coefficients of the audio.
 
+    params:
+        audio_frames_data: audio frame datas,get from funciton get_audio_frames.
+        rate : 16000 is default,this is sample rate.
+        frames_per_second : default 30, frames per second.
+        chunks_length :default 260. according to the theory
+
+    return:
+     LPC frame datas.
+'''
 def c_lpc(audio_frames_data, rate=16000, frames_per_second = 30,chunks_length = 260, overlap_frames_apart=0.008,
           numberOfFrames=64):
     inputData_array = np.zeros(shape=(1, 32,

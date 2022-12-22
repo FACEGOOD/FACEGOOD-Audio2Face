@@ -48,16 +48,28 @@ def acquire(*locks):
 x_lock = threading.Lock()
 y_lock = threading.Lock()
 
+'''
+UdpRecvHandler: udp server, used to receive recording and stop recording signal from ue project.
+主要用于接受ue端发送过来的数据
+'''
+
 class UdpRecvHandler:
+    '''
+        init udp server, and bind to addr addr_bind.
+    '''
     def __init__(self, addr_bind):
         self.addr_bind = addr_bind
         self.udp =  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp.setblocking(1)
         self.udp.bind(self.addr_bind)
         self.udp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
         thread = threading.Thread(None,target = self.recv_handler)
         thread.start()
+
+    '''
+        main function,use to listenning the ue signals
+        接收数据的函数主体
+    '''
 
     def recv_handler(self):
         global RECORDING
@@ -81,12 +93,27 @@ class UdpRecvHandler:
                     print("Unknown",recv_msg)
 
 
+'''
+    UdpSendHandler: udp client ,used to send facial expression weights to ue.
+    主要用于数据发送
+'''
+
 class UdpSendHandler:
+    '''
+        init the send to address addr_send.
+    '''
     def __init__(self, addr_send):
         self.addr_send = addr_send
         self.udp =  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp.setblocking(1)
         self.udp.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+    '''
+        send weights to remote ue project.
+        发送表情权重数据到ue端
+        param:
+            data: weights data
+    '''
 
     def send_handler(self,data):
         data = np.array(data, dtype='float32')

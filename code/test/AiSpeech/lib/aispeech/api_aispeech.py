@@ -11,7 +11,22 @@ import time
 import json
 
 
+'''
+this class is used to connect to speech server and ask for text chat and tts services.
+该类主要用于思必驰云端的文本交互及tts功能的使用。
+主体功能包括
+1.确保token的有效性。（update_token)
+2.文本对答，根据输入文本返回答案文本。(chat)
+3.将文本转换成对应参数要求的语音。(tts/dm_tts)
+'''
+
 class AiSpeech(object):
+    '''
+    input params that will use to connect to speech server.
+    params:
+        productId,publicKey and secretKey are provide by SPEECH(思必驰)
+
+    '''
     def __init__(self,productId,publicKey,secretKey,productIdChat=None,token = None,expireTimeSecs=5):
         self.productId = productId
         self.publicKey = publicKey
@@ -24,6 +39,11 @@ class AiSpeech(object):
         self.expireTime = None
         # 过期时间 5秒前更新token
         self.expireTimeSecs = expireTimeSecs
+
+    '''
+        this function is use to update the token str before expired
+        这个函数主要用于更新过期token字符串
+    '''
 
     def update_token(self,url = None):
         if url is None:
@@ -50,6 +70,14 @@ class AiSpeech(object):
         else:
             print("ERROR:",r_data)
             return False
+
+    '''
+    chat function,send question text  to the server and receive the answer text.
+    2.文本对答，根据输入文本返回答案文本。(chat)
+    param:
+        url : the remote api port url
+        text: the question text str
+    '''
 
     def chat(self,url = None,text=None):
         if url is None:
@@ -99,6 +127,15 @@ class AiSpeech(object):
             print("ERROR:query is not this answer\n","query is:",text,"request is:",r_data)
             return False
 
+    '''
+    tts function use to input text and return the audio data
+    3.将文本转换成对应参数要求的语音。(tts/dm_tts)
+    param :
+        url :the remote api url .
+        text : text str wait for transmit.
+        speaker : the sounds owner id.
+
+    '''
 
     def tts(self,url = None,text=None,speaker="zsmeif"):
         if url is None:
@@ -137,7 +174,16 @@ class AiSpeech(object):
             return r_tts.content
         else:
             print("ERROR:tts is failed\n","text is:",text)
-        
+    
+    '''
+    dm_tts function use to input text and return the audio data
+    3.将文本转换成对应参数要求的语音。(tts/dm_tts)
+    param :
+        url :the remote api url .
+        text : text str wait for transmit.
+        speaker : the sounds owner id.
+
+    '''    
     def dm_tts(self,url = None,text=None,speaker="zsmeif"):
         if url is None:
             url = "https://api.talkinggenie.com/api/v1/ba"
@@ -172,12 +218,7 @@ class AiSpeech(object):
         }
         
         r_dm_tts = requests.post(url, headers = headers, data=json.dumps(requests_body))
-        # print(r_dm_tts)
         return r_dm_tts
-        # if r_dm_tts.status_code == 200:
-        #     return r_dm_tts.content
-        # else:
-        #     print("ERROR:tts is failed\n","text is:",text)
 
 
 if __name__ == "__main__":
