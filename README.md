@@ -107,6 +107,9 @@ dataSet	train_data	    train_label_var	val_data	    val_label_var
 15	(22920, 32, 64, 1)	(22920, 37)	(1000, 32, 64, 1)	(1000, 37)
 16	(25485, 32, 64, 1)	(25485, 37)	(1000, 32, 64, 1)	(1000, 37)
 ```
+
+we only used dataSet 4 to dataSet 16
+
 The testing data, Maya model, and ue4 test project can be downloaded from the link below.
 
 the index of dataset 4-16 is for trainning.
