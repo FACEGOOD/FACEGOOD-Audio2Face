@@ -118,7 +118,7 @@ the index of dataset 4-16 is for trainning.
 
 [GoogleDrive](https://drive.google.com/drive/folders/1r7b7sfMebhtG0NSZk1yHzMaHRosb8xd1?usp=sharing)
 
-
+Add maya model in maya-model folder
 ## Update
 
 uploaded the LPC source into code folder.
