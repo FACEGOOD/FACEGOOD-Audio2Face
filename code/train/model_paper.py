@@ -1,4 +1,4 @@
-# Copyright 2021 The FACEGOOD Authors. All Rights Reserved.
+# Copyright 2023 The FACEGOOD Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,112 +14,174 @@
 # ==============================================================================
 
 import tensorflow as tf
+from tensorflow.keras import Model, models
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, Dropout
 
 
-# import numpy as np
+def conv2d_layer(filters=256, kernel_size=None, strides=None):
+    """Conv2D Layer
+    Args:
+        filters: int, the output channels of the conv2d layer
+        kernel_size: list, the kernel size of the conv2d layer
+        strides: list, the strides of the conv2d layer
+    """
+    if kernel_size is None:
+        kernel_size = [1, 1]
+    if strides is None:
+        strides = [1, 1]
+    conv2d = Conv2D(filters=filters, kernel_size=kernel_size, padding="same", activation='relu', strides=strides)
+    return conv2d
 
+class FormantLayer(Model):
+    """Formant Layer
+    Args:
+        kernels_size: list, the kernel size of each conv2d layer
+        outputs: list, the output channels of each conv2d layer    
+    """
+    def __init__(self, kernels_size=None, outputs=None):
+        super(FormantLayer, self).__init__()
 
-# 定义网络模型
-def net(input_data, outputSize, keep_pro):
-    # Formant network
-    conv1 = tf.layers.conv2d(inputs=input_data, filters=72, kernel_size=[3, 1],
-                             padding="same", activation=tf.nn.relu, strides=[2, 1])
-    conv2 = tf.layers.conv2d(inputs=conv1, filters=108, kernel_size=[3, 1],
-                             padding="same", activation=tf.nn.relu, strides=[2, 1])
-    conv3 = tf.layers.conv2d(inputs=conv2, filters=162, kernel_size=[3, 1],
-                             padding="same", activation=tf.nn.relu, strides=[2, 1])
-    conv4 = tf.layers.conv2d(inputs=conv3, filters=243, kernel_size=[3, 1],
-                             padding="same", activation=tf.nn.relu, strides=[2, 1])
-    conv5 = tf.layers.conv2d(inputs=conv4, filters=256, kernel_size=[2, 1],
-                             padding="same", activation=tf.nn.relu, strides=[2, 1])
+        if kernels_size is None:
+            kernels_size = [[3, 1], [3, 1], [3, 1], [3, 1], [2, 1]]
+        if outputs is None:
+            outputs = [72, 108, 162, 243, 256]
 
-    E = 16  # emotional state
-    emotion_input = tf.layers.conv2d(inputs=input_data, filters=E, kernel_size=[3, 1],
-                                     padding="same", activation=tf.nn.relu, strides=[32, 1])
+        self.kernels_size = kernels_size
+        self.outputs = outputs
 
-    # Articulation network
-    conv6 = tf.layers.conv2d(inputs=conv5, filters=256, kernel_size=[1, 3],
-                             padding="same", activation=tf.nn.relu, strides=[1, 2])
-    emotion1 = tf.layers.conv2d(inputs=emotion_input, filters=E, kernel_size=[1, 3],
-                                padding="same", activation=tf.nn.relu, strides=[1, 2])
-    mixed1 = tf.concat([conv6, emotion1], 3)
+        self.formant_layers = models.Sequential()
+        for i in range(len(self.kernels_size)):
+            self.formant_layers.add(conv2d_layer(filters=self.outputs[i],
+                                                 kernel_size=self.kernels_size[i],
+                                                 strides=[2, 1]))
 
-    conv7 = tf.layers.conv2d(inputs=mixed1, filters=256, kernel_size=[1, 3],
-                             padding="same", activation=tf.nn.relu, strides=[1, 2])
-    emotion2 = tf.layers.conv2d(inputs=emotion_input, filters=E, kernel_size=[1, 3],
-                                padding="same", activation=tf.nn.relu, strides=[1, 4])
-    mixed2 = tf.concat([conv7, emotion2], 3)
+    def call(self, x):
+        x = self.formant_layers(x)  
+        return x
 
-    conv8 = tf.layers.conv2d(inputs=mixed2, filters=256, kernel_size=[1, 3],
-                             padding="same", activation=tf.nn.relu, strides=[1, 2])
-    emotion3 = tf.layers.conv2d(inputs=emotion_input, filters=E, kernel_size=[1, 3],
-                                padding="same", activation=tf.nn.relu, strides=[1, 8])
-    mixed3 = tf.concat([conv8, emotion3], 3)
+class ArticulationLayer(Model):
+    """Articulation Layer
+    Args:
+        kernels_size: list, the kernel size of each conv2d layer
+        E: int, the channels of the emotion layer
+        conv2d_strides: list, the strides of each conv2d layer
+        emotion_strides: list, the strides of each emotion layer
+    """
+    def __init__(self, kernels_size=None, E=16, conv2d_strides=None, emotion_strides=None):
+        super(ArticulationLayer, self).__init__()
 
-    conv9 = tf.layers.conv2d(inputs=mixed3, filters=256, kernel_size=[1, 3],
-                             padding="same", activation=tf.nn.relu, strides=[1, 2])
-    emotion4 = tf.layers.conv2d(inputs=emotion_input, filters=E, kernel_size=[1, 3],
-                                padding="same", activation=tf.nn.relu, strides=[1, 16])
-    mixed4 = tf.concat([conv9, emotion4], 3)
+        self.E = E 
+        if kernels_size is None:
+            kernels_size = [[1, 3], [1, 3], [1, 3], [1, 3], [1, 4]]
+        if emotion_strides is None:
+            emotion_strides = [[1, 2], [1, 4], [1, 8], [1, 16], [1, 64]]
+        if conv2d_strides is None:
+            conv2d_strides = [[1, 2], [1, 2], [1, 2], [1, 2], [1, 4]]
 
-    conv10 = tf.layers.conv2d(inputs=mixed4, filters=256, kernel_size=[1, 4],
-                              padding="same", activation=tf.nn.relu, strides=[1, 4])
-    emotion5 = tf.layers.conv2d(inputs=emotion_input, filters=E, kernel_size=[1, 3],
-                                padding="same", activation=tf.nn.relu, strides=[1, 64])
-    mixed5 = tf.concat([conv10, emotion5], 3)
+        self.kernels_size = kernels_size
+        self.emotion_strides = emotion_strides
+        self.conv2d_strides = conv2d_strides
 
-    # Output network
-    flat = tf.layers.flatten(mixed5)
+        self.emotion = conv2d_layer(self.E, [3, 1], [32, 1])
+        self.articulation_layer = []
+        for i in range(len(self.kernels_size)):
+            self.articulation_layer.append([conv2d_layer(256, self.kernels_size[i], self.conv2d_strides[i]),
+                                            conv2d_layer(self.E, [1, 3], self.emotion_strides[i])])
+    def call(self, x):
+        emotion_input = self.emotion(x)
+        for i in range(len(self.kernels_size)):
+            conv_x = self.articulation_layer[i][0](x)
+            emotion_x = self.articulation_layer[i][1](emotion_input)
+            mixed_x = tf.concat([conv_x, emotion_x], 3) # Concatenate the channels
+            x = mixed_x
+        return (x, emotion_input)
 
-    fc1 = tf.layers.dense(inputs=flat, units=150, activation=None)  # activation=None表示使用线性激活器
-    dropout = tf.nn.dropout(fc1, keep_pro)
-    output = tf.layers.dense(inputs=dropout, units=outputSize, activation=None)
-    return output, emotion_input
+class OutputLayer(Model):
+    """Output Layer
+    Args:
+        output_size: int, the output size of the output layer
+        keep_pro: float, the keep probability of the dropout layer
+    """
+    def __init__(self, output_size, keep_pro):
+        super(OutputLayer, self).__init__()
+        self.output_layer = models.Sequential([
+            # Flatten(),
+            Dense(units=150, activation=None),
+            Dropout(keep_pro),
+            Dense(units=output_size, activation=None)
+        ])
+    def call(self, x):
+        return self.output_layer(x)
 
-#define losses functions
-def losses(y, y_, emotion_input):
-    # 计算 loss_P
-    loss_P = tf.reduce_mean(tf.square(y - y_))
+class Audio2Face(Model):
+    """Audio2Face Model
+    Args:
+        output_size: int, the output size of the output layer
+        keep_pro: float, the keep probability of the dropout layer
+    """
+    def __init__(self, output_size, keep_pro):
+        super(Audio2Face, self).__init__()
+        self.output_size = output_size
+        self.FormantLayer = FormantLayer()
+        self.ArticulationLayer = ArticulationLayer()
+        self.OutputLayer = OutputLayer(self.output_size, keep_pro)
+        
+    def call(self, x):
+        x = self.FormantLayer(x)
+        x, emotion_input = self.ArticulationLayer(x)
+        x = self.OutputLayer(x)
+        return (x, emotion_input)
 
-    # 计算 loss_M
-    split_y = tf.split(y, 2, 0)  # 参数分别为：tensor，拆分数，维度
-    split_y_ = tf.split(y_, 2, 0)  # 参数分别为：tensor，拆分数，维度
-    # print(10)
-    y0 = split_y[0]
-    y1 = split_y[1]
-    y_0 = split_y_[0]
-    y_1 = split_y_[1]
-    loss_M = 2 * tf.reduce_mean(tf.square(y0 - y1 - y_0 + y_1))
+def losses(y, output):
+    """Loss Function
+    Args:
+        y: tensor, the ground truth
+        output: tensor,[pred , emotion_input] the output of the model
+    """
+    y_, emotion_input = output
 
-    # 计算loss_R
-    # 拆分tensor。https://blog.csdn.net/liuweiyuxiang/article/details/81192547
-    split_emotion_input = tf.split(emotion_input, 2, 0)  # 参数分别为：tensor，拆分数，维度
-    # print(10)
-    emotion_input0 = split_emotion_input[0]
-    emotion_input1 = split_emotion_input[1]
+    y = tf.cast(y, dtype=tf.float32)    # Cast the type of y to float32
+    y_ = tf.cast(y_, dtype=tf.float32)  # Cast the type of y_ to float32
+    emotion_input = tf.cast(emotion_input, dtype=tf.float32) # Cast the type of emotion_input to float32
 
-    # 公式(3),Rx3即R'(x)
-    Rx0 = tf.square(emotion_input0 - emotion_input1)  # 计算m[·]
-    Rx1 = tf.reduce_sum(Rx0, 1)  # 4维。按shape(1)计算和，即：高
-    Rx2 = tf.reduce_sum(Rx1, 1)  # 3维。按shape(1)计算和，即：4维的shape(2)，宽
-    Rx3 = 2 * tf.reduce_mean(Rx2, 1)  # 2维。按shape(1)计算均值，即：4维的shape(3)，E
+    loss_P = tf.reduce_mean(tf.square(y - y_)) # Calculate the loss_P
 
-    # 公式(4),Rx是长度为batch_size/2的tensor
-    e_mean0 = tf.reduce_sum(tf.square(emotion_input0), 2)  # 4维。按shape(2)计算和，即：宽。因为高为1，所以只算一次sum
-    e_mean1 = tf.reduce_mean(e_mean0)  # 2维。按shape(1)计算均值，即：4维的shape(3)，E
-    Rx = Rx1 / e_mean1
+    # Calculate the loss_M
+    split_y = tf.split(y, 2, 0)  # Parameter: tensor, split number, dimension
+    split_y_ = tf.split(y_, 2, 0)
 
-    # 公式(5)
-    # R_vt = beta * R_vt_input + (1-beta) * tf.reduce_mean(tf.square(Rx)) #每个batch运行一次
+    y0 = split_y[0] # y0 is the first half of y
+    y1 = split_y[1] # y1 is the second half of y
+    y_0 = split_y_[0]   # y_0 is the first half of y_
+    y_1 = split_y_[1]   # y_1 is the second half of y_
+    loss_M = 2 * tf.reduce_mean(tf.square(y0 - y1 - y_0 + y_1)) # Calculate the loss_M
+
+    # Calculate the loss_R
+    split_emotion_input = tf.split(emotion_input, 2, 0)
+    emotion_input0 = split_emotion_input[0] # emotion_input0 is the first half of emotion_input
+    emotion_input1 = split_emotion_input[1] # emotion_input1 is the second half of emotion_input
+
+    # Formula(3), Rx3 is R'(x)
+    Rx0 = tf.square(emotion_input0 - emotion_input1)  # Calculate the m[·]
+    Rx1 = tf.reduce_sum(Rx0, 1)  # 4-dim, sum of the height
+    Rx2 = tf.reduce_sum(Rx1, 1)  # 3-dim, sum of the width
+    Rx3 = 2 * tf.reduce_mean(Rx2, 1)  # 2-dim, mean of the emotion
+
+    # Formula(4), Rx is R(x), length is batch_size/2
+    e_mean0 = tf.reduce_sum(tf.square(emotion_input0), 2)  # 4-dim, sum of the width
+    e_mean1 = tf.reduce_mean(e_mean0)  # 2-dim, mean of the emotion
+    Rx = Rx3 / e_mean1  # R(x)
+
+    # Formula(5)
+    # beta = 0.99
+    # R_vt = beta * R_vt_input + (1-beta) * tf.reduce_mean(tf.square(Rx)) # every epoch update
     # R_vt_ = R_vt/(1-tf.pow(beta, step))
 
-    # 公式(6)
+    # Formula(6) Calculate the loss_R
     # loss_R = tf.reduce_mean(Rx)/(tf.sqrt(R_vt_)+epsilon)
     loss_R = tf.reduce_mean(Rx)
-
     # loss_R = tf.reduce_mean(tf.square(emotion_input1 - emotion_input0), name='loss_R')
 
-    # 计算最终的 Loss
+    # Calculate the total loss
     loss = loss_P + loss_M + loss_R
-
     return loss

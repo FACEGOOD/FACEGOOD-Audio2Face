@@ -22,7 +22,7 @@ from ctypes import *
 
 # import time
 
-project_dir = r'./wav'
+project_dir = r'./'
 dll = cdll.LoadLibrary(os.path.join(project_dir, 'LPC.dll'))  # 加载 LPC.dll
 # wav_path = os.path.join(project_dir,'wav','1015_2_01.wav') # 音频路径
 # save_path = os.path.join(project_dir,'lpc','lpc_1015_2_01.npy') # 保存LPC处理后的数组
