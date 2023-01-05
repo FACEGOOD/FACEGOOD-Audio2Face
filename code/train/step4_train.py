@@ -20,7 +20,7 @@ import numpy as np
 import time
 import logging
 
-from model_paper_v2 import losses, Audio2Face
+from model_paper import losses, Audio2Face
 
 # tf.config.run_functions_eagerly(True) # Run eagerly
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true' # Allow GPU memory growth
@@ -128,10 +128,10 @@ def train(epochs,
 if __name__ == '__main__':
     # Set random seed
     tf.random.set_seed(123)
-    dataSet = 'dataSet16_dl'
+    dataSet = 'dataSet4_6'
 
     # Training Parameters
-    EPOCHS = 100    # The number of epochs to train the model
+    EPOCHS = 50    # The number of epochs to train the model
     CKPT_EPOCHS = 0 # The epoch to restore the model
     
     test_freq = 10  # Test the model every test_freq epochs
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     # Path
     project_dir = './'
-    output_path = './output16_dl/'
+    output_path = './output4_6/'
 
     checkpoint_save_path = output_path + 'checkpoint/Audio2Face'
     model_save_path = output_path + 'models/Audio2Face'

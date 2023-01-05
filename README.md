@@ -58,7 +58,7 @@ http://www.avatary.com
 All train code in folder code/train.
 
 the data for train is stored in dataSet
-In windows, you can simply use the script to train and test the model.
+In windows, you can simply download the dataset in the following link, then use the script to train the model.
 
 ```powershell/cmd
 ./train.bat
@@ -101,6 +101,7 @@ you can follow the steps below to use it:
 tersorflow-gpu 2.6  
 cudatoolkit 11.3.1 
 cudnn 8.2.1 
+scipy 1.7.1
 
 python-libs:
     pyaudio
