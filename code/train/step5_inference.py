@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import os
-import time
 
 class tfliteInference:
     def __init__(self, model_path, pb_model_path=None):
@@ -35,8 +34,8 @@ class tfliteInference:
         return mesh
 
 if __name__ == "__main__":
-    tflitepath = './output16_dl/models/Audio2Face.tflite'
-    model_path = './output16_dl/models/Audio2Face'
+    tflitepath = './output4_6/models/Audio2Face.tflite'
+    model_path = './output4_6/models/Audio2Face'
 
     if os.path.exists(tflitepath):
         model_path = None
@@ -57,5 +56,5 @@ if __name__ == "__main__":
 
     # Set numpy unlimited write
     np.set_printoptions(threshold=np.inf)
-    with open('./output16_dl/weight.txt', 'w') as f:
+    with open('./output4_6/weight.txt', 'w') as f:
         f.write(f"{str(weight)}")

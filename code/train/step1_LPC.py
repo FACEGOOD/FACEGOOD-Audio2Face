@@ -32,6 +32,8 @@ name_list = ['1_01', '1_02', '2_01', '2_02', '2_03', '2_04', '2_05', '2_06', '2_
 wav_path = [os.path.join(project_dir, 'wav', '1114_' + file + '.wav') for file in name_list]    # 音频路径
 save_path = [os.path.join(project_dir, 'lpc', '1114_' + file + '.npy') for file in name_list]   # 保存LPC处理后的数组
 
+if not os.path.exists(os.path.join(project_dir, 'lpc')):
+    os.makedirs(os.path.join(project_dir, 'lpc'))
 
 def audioProcess(wav_path):
     # 读取wav文件，存入list
