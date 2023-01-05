@@ -1,4 +1,4 @@
-# Copyright 2021 The FACEGOOD Authors. All Rights Reserved.
+# Copyright 2023 The FACEGOOD Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,179 +12,186 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+import os
+import sys
 import tensorflow as tf
 import numpy as np
-from model_paper import net
-from model_paper import losses
-import os
-from tensorflow.python.framework import graph_util
-# from tensorflow.python.tools import freeze_graph
-import shutil
+
 import time
+import logging
 
-tf.set_random_seed(123)
+from model_paper_v2 import losses, Audio2Face
 
-# 将tf日志信息输出到屏幕
-# tf.logging.set_verbosity(tf.logging.INFO)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-# 重置计算图
-tf.reset_default_graph()
-
-# 设置参数
-FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_integer('epochs', 2, 'Number of steps to run trainer') #100
-tf.app.flags.DEFINE_string('dataSet', 'dataSet1', 'dataSet name')
-
-epoch = FLAGS.epochs
-dataSet = FLAGS.dataSet
-
-project_dir = r'D:\voice2face\shirley_1119'
-data_dir = os.path.join(project_dir, dataSet)
-
-# 加载数据
-x_train = np.load(os.path.join(data_dir, 'train_data.npy'))
-y_train = np.load(os.path.join(data_dir, 'train_label_var.npy'))
-x_val = np.load(os.path.join(data_dir, 'val_data.npy'))
-y_val = np.load(os.path.join(data_dir, 'val_label_var.npy'))
-print(x_train.shape)
-print(y_train.shape)
-print(x_val.shape)
-print(y_val.shape)
-
-# Training Parameters
-batch_size = 128
-starter_learning_rate = 0.001
-output_size = y_val.shape[1]
+# tf.config.run_functions_eagerly(True) # Run eagerly
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true' # Allow GPU memory growth
 
 
-def train():
-    tf.set_random_seed(123) # 设置seed
+def get_logger(filename, logger_name=None):
+    """set logging file and format
+    Args:
+        filename: str, full path of the logger file to write
+        logger_name: str, the logger name, e.g., 'master_logger', 'local_logger'
+    Return:
+        logger: python logger
+    """
+    log_format = "%(asctime)s %(message)s"
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO,
+                        format=log_format, datefmt="%m%d %I:%M:%S %p")
+    # different name is needed when creating multiple logger in one process
+    logger = logging.getLogger(logger_name)
+    fh = logging.FileHandler(os.path.join(filename))
+    fh.setFormatter(logging.Formatter(log_format))
+    logger.addHandler(fh)
+    return logger
 
-    # 配置路径
-    logs_dirs = os.path.join(project_dir, 'logs')    # log
-    logs_dir = os.path.join(logs_dirs, '0317_' + dataSet + '_var_epoch' + str(epoch) + '_' + str(y_train.shape[0]))
-    input_checkpoint_path = os.path.join(logs_dir, 'model.ckpt')    # check point
-    pb_dir = os.path.join(project_dir, 'pb')     # 模型
-    out_pb_path = os.path.join(pb_dir, '0317_' + dataSet + '_var_epoch' + str(epoch) + '_' + str(y_train.shape[0]) + '.pb')   # 输出模型
 
-    # 创建logs目录和pb目录
-    if not os.path.exists(logs_dirs):
-        os.mkdir(logs_dirs)
-    if os.path.exists(logs_dir):
-        shutil.rmtree(logs_dir)
-        os.mkdir(logs_dir) 
-    if not os.path.exists(pb_dir):
-        os.mkdir(pb_dir)
+def train(epochs,
+          ckpt_epoch,
+          model,
+          checkpoint_save_path,
+          loss_object,
+          optimizer,
+          train_ds,
+          test_ds,
+          test_freq=5,
+          save_freq=50,
+          logger=None):
+    """Train the model
+    Args:
+        epochs: int, the number of epochs to train the model
+        ckpt_epoch: int, the number of epochs to train the model
+        model: tf.keras.Model, the model to train
+        checkpoint_save_path: str, the path to save the checkpoint
+        loss_object: tf.keras.losses, the loss function
+        optimizer: tf.keras.optimizers, the optimizer
+        train_ds: tf.data.Dataset, the training dataset
+        test_ds: tf.data.Dataset, the test dataset
+        test_freq: int, the frequency to test the model
+        save_freq: int, the frequency to save the model
+        logger: python logger
+    """
 
-    # op 把需要的记录数据写入文件
-    train_loss = tf.summary.FileWriter(os.path.join(logs_dir, 'train_loss'), graph=tf.get_default_graph())
-    val_loss = tf.summary.FileWriter(os.path.join(logs_dir, 'val_loss'), graph=tf.get_default_graph())
+    # Loss metrics
+    train_loss = tf.keras.metrics.Mean(name='train_loss')
+    test_loss = tf.keras.metrics.Mean(name='test_loss')
 
-    # 占位符
-    keep_pro = tf.placeholder(tf.float32)   # dropout机制使用
-    data = tf.placeholder(shape=[None, x_val.shape[1], x_val.shape[2], x_val.shape[3]], dtype=tf.float32)
-    label = tf.placeholder(shape=[None, output_size], dtype=tf.float32)
-    # is_training = tf.placeholder(tf.bool)
+    # Restore the latest checkpoint if exists
+    if os.path.exists(checkpoint_save_path + ".index") and ckpt_epoch>1 :
+        logger.info(f'------------- load the epoch-{ckpt_epoch} model------------')
+        model.load_weights(checkpoint_save_path)
 
-    output, emotion_input = net(data, output_size, keep_pro)  # 输入网络
-    # l2_loss = tf.losses.get_regularization_loss()
-    loss0 = losses(output, label, emotion_input)    # 计算 loss
-    tf.summary.scalar('loss0', loss0)   # 创建 summary 来观察损失值
-    # loss = loss0 + l2_loss
-    # tf.summary.scalar('loss',loss)# 创建summary来观察损失值
+    # Train the model for epochs
+    for epoch in range(ckpt_epoch+1, epochs + 1):
+        # Reset the metrics at the start of the next epoch
+        train_loss.reset_states()
 
-    global_steps = tf.Variable(0, trainable=False)
-    # 指数衰减法训练
-    learning_rate = tf.train.exponential_decay(starter_learning_rate, global_steps, x_train.shape[0]//batch_size*10,
-                                               0.98, staircase=True)
-    # 通知Tensorflow在训练时要更新均值和方差的分布
-    with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
-        my_opt = tf.train.AdamOptimizer(learning_rate)  # 设置优化器
-        train_step = my_opt.minimize(loss0, global_step=global_steps)   # 目标，使得损失函数达到最小值
-    summary_op = tf.summary.merge_all()
+        time_start = time.time() # Record the start time of each epoch
+        for train_data, labels in train_ds:
+            with tf.GradientTape() as tape:
+                # training=True is only needed if there are layers with different
+                # behavior during training versus inference (e.g. Dropout).
+                predictions, emotion_input = model(train_data, training=True)
+                loss = loss_object(labels, (predictions, emotion_input))
 
-    # 初始化变量
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
-    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))   # 创建一个 session
-    # sess = tf.Session(config=tf.ConfigProto(log_device_placement=True)) #使用 GPU
-    # train_writer = tf.summary.FileWriter(logs_dir, sess.graph)
+            gradients = tape.gradient(loss, model.trainable_variables)  # Calculate gradients
+            optimizer.apply_gradients(zip(gradients, model.trainable_variables)) # Update weights
+            train_loss.update_state(loss)   # Update training metric
+        time_end = time.time()  
+        logger.info(    # Log the training information
+            f'Training Epoch-{epoch} '
+            f'LR: {optimizer._decayed_lr(tf.float32).numpy():.8f}, '
+            f'Loss: {train_loss.result().numpy():.5f}, '
+            # f'Accuracy: {train_accuracy.result().numpy() * 100:.5f}, '
+            f'Time: {time_end - time_start:.2f}')
+        
+        # Validate the model every test_freq epochs
+        if (epoch % test_freq) == 0 or epoch == epochs:
+            test_loss.reset_states()
+            # test_accuracy.reset_states()
+            for test_data, test_labels in test_ds:
+                predictions, emotion_input = model(test_data, training=False)
+                t_loss = loss_object(test_labels, (predictions, emotion_input)) # Update loss
+                test_loss.update_state(t_loss)  # Update test metric
+                # test_accuracy.update_state(test_labels, predictions)
+            logger.info(    # Log the test information
+                f'----- Test '
+                f'Loss: {test_loss.result().numpy():.5f}')
 
-    saver = tf.train.Saver()
-    sess.run(tf.global_variables_initializer())
-
-    # 迭代训练
-    for i in range(epoch):
-        time1 = time.time()
-        shuffle_indices = np.random.permutation(len(x_train))   # 随机索引数据
-
-        # 将数据划分为 batch
-        for j in range(x_train.shape[0]//batch_size):
-            index = shuffle_indices[batch_size * j: batch_size * (j + 1)]
-            train_data, train_label = x_train[index], y_train[index]
-            train_op = sess.run(train_step, feed_dict={data: train_data, label: train_label, keep_pro: 0.5})
-
-        train_random_index = np.random.choice(x_train.shape[0], 1200, False)
-        # val_random_index = np.random.choice(x_val.shape[0],1000,False)
-
-        # for train_loss
-        # summary = sess.run(loss, feed_dict={data: x_train[:360], label: y_train[:360], keep_pro: 1})
-        summary = sess.run(summary_op, feed_dict={data: x_train[train_random_index],
-                                                  label: y_train[train_random_index],
-                                                  keep_pro: 1})
-        train_loss.add_summary(summary, i)
-        train_loss.flush()
-
-        # for val_loss
-        # summary = sess.run(loss, feed_dict={data: x_val[:360], label: y_val[:360], keep_pro: 1})
-        summary = sess.run(summary_op, feed_dict={data: x_val, label: y_val, keep_pro: 1})
-        val_loss.add_summary(summary, i)
-        val_loss.flush()
-
-        train_loss0 = sess.run(loss0, feed_dict={data: x_train[train_random_index],
-                                                 label: y_train[train_random_index],
-                                                 keep_pro: 1})
-        val_loss0 = sess.run(loss0, feed_dict={data: x_val, label: y_val, keep_pro: 1})
-
-        # 输出训练信息
-        print('epoch: ' + str(i+1) + ', train_loss: ' + str(train_loss0) +
-              ', val_loss: ' + str(val_loss0), 'time: ' + str(time.time()-time1))
-
-        # train_loss1 = sess.run(loss, feed_dict={data: x_train[:1200], label: y_train[:1200], keep_pro: 1})
-        # val_loss1 = sess.run(loss, feed_dict={data: x_val, label: y_val, keep_pro: 1})
-        # print('epoch: ' + str(i+1) + ', train_loss: ' + str(train_loss1) + ', val_loss: ' + str(val_loss1))
-        # print('learning_rate: ', sess.run(learning_rate))
-        # print('global_steps: ', sess.run(global_steps))
-
-        # 保存check point
-        checkpoint_path = os.path.join(logs_dir, 'model.ckpt')
-        saver.save(sess, checkpoint_path)       
-    sess.close() 
-
-# def freeze_graph(input_checkpoint,output_graph):
-    # 指定输出的节点名称,该节点名称必须是原模型中存在的节点
-    output_node_names = "dense_1/BiasAdd"
-    saver = tf.train.import_meta_graph(input_checkpoint_path + '.meta', clear_devices=True)
-    graph = tf.get_default_graph()  # 获得默认的图
-    input_graph_def = graph.as_graph_def()  # 返回一个序列化的图代表当前的图
- 
-    with tf.Session() as sess:
-        saver.restore(sess, input_checkpoint_path)  # 恢复图并得到数据
-        output_graph_def = graph_util.convert_variables_to_constants(  # 模型持久化，将变量值固定
-            sess=sess,
-            input_graph_def=input_graph_def,    # 等于 sess.graph_def
-            output_node_names=output_node_names.split(","))     # 如果有多个输出节点，以逗号隔开
- 
-        with tf.gfile.GFile(out_pb_path, "wb") as f:    # 保存模型
-            f.write(output_graph_def.SerializeToString())   # 序列化输出
-        print("%d ops in the final graph." % len(output_graph_def.node))    # 得到当前图有几个操作节点
+        # Save the model every save_freq epochs
+        if (epoch % save_freq) == 0 or epoch == epochs:
+            model.save_weights(checkpoint_save_path)
+            logger.info(f"----- Save Checkpoint: {checkpoint_save_path}")
+    model.summary() # Print the model summary
+    model.save(model_save_path) # Save the model
 
 
 if __name__ == '__main__':
-    # if tf.gfile.Exists(FLAGS.logs_dir):
-    #     tf.gfile.DeleteRecursively(FLAGS.logs_dir)
-    # tf.gfile.MakeDirs(FLAGS.logs_dir)
+    # Set random seed
+    tf.random.set_seed(123)
+    dataSet = 'dataSet16_dl'
 
-    train()
-    # freeze_graph(input_checkpoint, out_pb_path)
+    # Training Parameters
+    EPOCHS = 100    # The number of epochs to train the model
+    CKPT_EPOCHS = 0 # The epoch to restore the model
+    
+    test_freq = 10  # Test the model every test_freq epochs
+    save_freq = 50  # Save the model every save_freq epochs
+    batch_size = 32 # Batch size
+    initial_learning_rate = 0.001   # Initial learning rate
+
+    keep_pro = 0.5  # Dropout rate
+
+    # Path
+    project_dir = './'
+    output_path = './output16_dl/'
+
+    checkpoint_save_path = output_path + 'checkpoint/Audio2Face'
+    model_save_path = output_path + 'models/Audio2Face'
+
+    # Create output folder
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+
+    data_dir = os.path.join(project_dir, dataSet)
+    logger = get_logger(filename=os.path.join(output_path, 'log.txt'))
+
+    # Load data
+    x_train = np.load(os.path.join(data_dir, 'train_data.npy'))
+    x_val = np.load(os.path.join(data_dir, 'val_data.npy'))
+    y_train = np.load(os.path.join(data_dir, 'train_label_var.npy'))
+    y_val = np.load(os.path.join(data_dir, 'val_label_var.npy'))
+
+    output_size = y_val.shape[1]
+
+    # Convert to tensor
+    x_train = tf.convert_to_tensor(value=x_train, dtype=tf.float32)[:-1]
+    y_train = tf.convert_to_tensor(value=y_train, dtype=tf.float32)[:-1]
+    x_val = tf.convert_to_tensor(value=x_val, dtype=tf.float32)
+    y_val = tf.convert_to_tensor(value=y_val, dtype=tf.float32)
+
+    # Create dataset
+    train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(10000).batch(batch_size)
+    test_ds = tf.data.Dataset.from_tensor_slices((x_val, y_val)).batch(batch_size)
+
+    # Setting training schedule
+    schedules = tf.keras.optimizers.schedules.ExponentialDecay(
+                                                initial_learning_rate,
+                                                decay_steps=x_train.shape[0] // batch_size * 10,
+                                                decay_rate=0.98,
+                                                staircase=True)
+    # Setting optimizer
+    optimizer = tf.keras.optimizers.Adam(schedules, epsilon=1e-08)
+    
+    # Setting loss function
+    loss_object = losses
+
+    # Build model
+    model = Audio2Face(output_size, keep_pro)
+    logger.info(f'\n\n--------------------------------------------------------------')
+
+    # Satrt training
+    train(EPOCHS, CKPT_EPOCHS, model, checkpoint_save_path, loss_object,
+          optimizer, train_ds, test_ds, test_freq, save_freq, logger)
+          
+    # Train Finished
+    logger.info(f'Train Finished')
