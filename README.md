@@ -19,7 +19,7 @@ We create a project that transforms audio to blendshape weights,and drives the d
 ![figure2](rsc/layers.png)
 
 
-The framework we used contains three parts.In Formant network step,we perform fixed-function analysis of the input audio clip.In the articulation network,we concatenate an emotional state vector to the output of each convolution layer after the ReLU activation. The fully-connected layers at the end expand the 256+E abstract features to  blendshape weights .
+The framework we used contains three parts. In Formant network step, we perform fixed-function analysis of the input audio clip. In the articulation network, we concatenate an emotional state vector to the output of each convolution layer after the ReLU activation. The fully-connected layers at the end expand the 256+E abstract features to  blendshape weights.
 
 
 ## Usage
@@ -52,12 +52,35 @@ Preprocess the wav to 2d data.
 
 ### train
 
-we recommand that uses FACEGOOD avatary to produces trainning data.its fast and accurate.
+We recommand that uses FACEGOOD avatary to produces trainning data.its fast and accurate.
 http://www.avatary.com
 
-the data for train is stored in dataSet1 
+All train code in folder code/train.
 
-> python step14_train.py --epochs 8 --dataSet dataSet1
+the data for train is stored in dataSet
+In windows, you can simply use the script to train and test the model.
+
+```powershell/cmd
+./train.bat
+```
+or you can use the following commands to generate data, train and test the model.
+
+[Note: you need to modify the path in every files to your own path.]
+
+```shell
+cd code/train
+
+python step1_LPC.py // deal with wav file to get lpc_*.npy
+
+python step3_concat_select_split.py // generate train data and label
+
+python step4_train.py // train model
+
+python step5_inference.py  // inference model
+
+```
+
+<!-- > python step14_train.py --epochs 8 --dataSet dataSet1 -->
 
 ### test
 
@@ -75,7 +98,9 @@ you can follow the steps below to use it:
 
 ## Dependences
 
-tersorflow-gpu 1.15  cuda 10.0 
+tersorflow-gpu 2.6  
+cudatoolkit 11.3.1 
+cudnn 8.2.1 
 
 python-libs:
     pyaudio
