@@ -73,7 +73,9 @@ def train(epochs,
 
     # Loss metrics
     train_loss = tf.keras.metrics.Mean(name='train_loss')
+    train_mse = tf.keras.metrics.MeanSquaredError(name='train_mse')
     test_loss = tf.keras.metrics.Mean(name='test_loss')
+    test_mse = tf.keras.metrics.MeanSquaredError(name='test_mse')
 
     # Restore the latest checkpoint if exists
     if os.path.exists(checkpoint_save_path + ".index") and ckpt_epoch>1 :
@@ -84,6 +86,7 @@ def train(epochs,
     for epoch in range(ckpt_epoch+1, epochs + 1):
         # Reset the metrics at the start of the next epoch
         train_loss.reset_states()
+        train_mse.reset_states()
 
         time_start = time.time() # Record the start time of each epoch
         for train_data, labels in train_ds:
@@ -96,26 +99,28 @@ def train(epochs,
             gradients = tape.gradient(loss, model.trainable_variables)  # Calculate gradients
             optimizer.apply_gradients(zip(gradients, model.trainable_variables)) # Update weights
             train_loss.update_state(loss)   # Update training metric
+            train_mse.update_state(labels, predictions) 
         time_end = time.time()  
         logger.info(    # Log the training information
             f'Training Epoch-{epoch} '
-            f'LR: {optimizer._decayed_lr(tf.float32).numpy():.8f}, '
+            f'LR: {optimizer._decayed_lr(tf.float32).numpy():e}, '
             f'Loss: {train_loss.result().numpy():.5f}, '
-            # f'Accuracy: {train_accuracy.result().numpy() * 100:.5f}, '
+            f'MSE: {train_mse.result().numpy():e}, '
             f'Time: {time_end - time_start:.2f}')
         
         # Validate the model every test_freq epochs
         if (epoch % test_freq) == 0 or epoch == epochs:
             test_loss.reset_states()
-            # test_accuracy.reset_states()
+            test_mse.reset_states()
             for test_data, test_labels in test_ds:
                 predictions, emotion_input = model(test_data, training=False)
                 t_loss = loss_object(test_labels, (predictions, emotion_input)) # Update loss
                 test_loss.update_state(t_loss)  # Update test metric
-                # test_accuracy.update_state(test_labels, predictions)
+                test_mse.update_state(test_labels, predictions) 
             logger.info(    # Log the test information
                 f'----- Test '
-                f'Loss: {test_loss.result().numpy():.5f}')
+                f'Loss: {test_loss.result().numpy():.5f}, '
+                f'MSE: {test_mse.result().numpy():e}')
 
         # Save the model every save_freq epochs
         if (epoch % save_freq) == 0 or epoch == epochs:
