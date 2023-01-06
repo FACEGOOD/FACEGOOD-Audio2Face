@@ -6,9 +6,11 @@
     :copyright: © 2019 by the facegood team.
 """
 import os
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
-from tensorflow.python.platform import gfile
+# import tensorflow.compat.v1 as tf
+import tensorflow as tf
+import numpy as np
+# tf.disable_v2_behavior()
+# from tensorflow.python.platform import gfile
 '''
 该类主要是调用tensorflow 加载训练好的算法模型，输入音频数据输出动画表情权重。
 this class load trained model and predict weights.
@@ -18,38 +20,47 @@ class WeightsAnimation:
         在_init__中对模型文件进行加载，并在initdata 中构建输入输出函数句柄。
         init tensorflow enviroment and load graph.
     '''
-    def __init__(self, pb_path):
-        self.sess = tf.Session()
-        with gfile.FastGFile(pb_path, 'rb') as f:
-            self.graph_def = tf.GraphDef()
-            self.graph_def.ParseFromString(f.read())
-            self.sess.graph.as_default()
-            tf.import_graph_def(self.graph_def, name='')
-        self.sess.run(tf.global_variables_initializer())
+    def __init__(self, model_path, pb_model_path=None):
+        self.model_path = model_path
+        if pb_model_path is not None:
+            self.convert_to_tflite(pb_model_path)
+        # Load the model
+        self.interpreter = tf.lite.Interpreter(model_path=model_path, num_threads=8)
+        # Set model input
+        self.interpreter.allocate_tensors()
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
 
-        self.initdata()
 
-    def initdata(self):
-        self.input_x = self.sess.graph.get_tensor_by_name('Placeholder_1:0')
-        self.input_keep_prob_tensor = self.sess.graph.get_tensor_by_name(
-            'Placeholder:0')
-        self.out = self.sess.graph.get_tensor_by_name('dense_1/BiasAdd:0')
+    def convert_to_tflite(self, pb_model_path):
+        # Convert the model from saved model(.pb) to tflite
+        converter = tf.lite.TFLiteConverter.from_saved_model(pb_model_path)
+        tflite_model = converter.convert()
+        with open(self.model_path, "wb") as f:
+            f.write(tflite_model)
 
-    '''
-        get_weight: predict weights
-        params: 
-            data:  lpc data
-            return : facial expression weights
-    '''
 
+    def run(self, inputData):
+        # Preprocess the image before sending to the network.
+        inputData = np.expand_dims(inputData, axis=0)
+        
+        # The actual detection.
+        self.interpreter.set_tensor(self.input_details[0]["index"], inputData)
+        self.interpreter.invoke()
+        # Save the results.
+        mesh = self.interpreter.get_tensor(self.output_details[0]["index"])[0]
+        return mesh
+    
+    
     def get_weight(self, data):
-        weight = self.sess.run(self.out,
-                                        feed_dict={
-                                            self.input_x: data,
-                                            self.input_keep_prob_tensor: 1.0
-                                        })
-
-        return weight
+        frame_num = data.shape[0]
+        weight = []
+        for i in range(frame_num): 
+            # print(f"frame is {i}")
+            data_temp = data[i].astype(np.float32)
+            output = self.run(data_temp).reshape((1,-1))
+            weight.extend(output)
+        return np.array(weight)
 
 
 if __name__ == "__main__":

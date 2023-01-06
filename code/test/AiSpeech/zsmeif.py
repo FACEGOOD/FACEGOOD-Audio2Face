@@ -71,7 +71,7 @@ ADDR_BIND = (AiSpeechConfig['config']['server']['ip'],AiSpeechConfig['config']['
 ADDR_SEND = (AiSpeechConfig['config']['client']['ip'],AiSpeechConfig['config']['client']['port'])
 
 ue4.BUFF_SIZE = AiSpeechConfig['config']['ue4']['recv_size']
-ue4.RECORDING = False
+ue4.RECORDING = True
 ue4.RECORDING_BEGIN = AiSpeechConfig['config']['ue4']['begin'].encode('utf-8')
 ue4.RECORDING_END = AiSpeechConfig['config']['ue4']['end'].encode('utf-8')
 
@@ -88,7 +88,7 @@ const_bs_value = [0.,0.,-0.,0.,-0.,0.,-0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.
 bs_name_index = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 94, 93, 95, 96, 97, 98, 99, 100, 101, 102, 103, 105, 104, 106, 107, 108, 109, 110, 111, 112, 113, 114, 1, 115]
 
 BS_CONUNT = 116
-pbfile_path = join(package_path, 'zsmeif.pb')
+# pbfile_path = join(package_path, 'zsmeif.pb')
 
 CPU_Thread = AiSpeechConfig['config']['tensorflow']['cpu']
 CPU_Frames = AiSpeechConfig['config']['tensorflow']['frames']
@@ -101,8 +101,10 @@ from lib.audio.api_audio import AudioRecognition, AudioPlay
 from lib.tensorflow.input_wavdata_output_lpc import c_lpc, get_audio_frames
 from lib.tensorflow.input_lpc_output_weight import WeightsAnimation
 
+tflitepath = './models/Audio2Face.tflite'
+model_path = './models/Audio2Face'
 #load tensorflow pb model file
-pb_weights_animation = WeightsAnimation(pbfile_path)
+pb_weights_animation = WeightsAnimation(tflitepath, model_path)
 get_weight = pb_weights_animation.get_weight
 
 # *******************************************
@@ -214,7 +216,7 @@ def main(fun_socket_send):
     expireTime = aispeech.update_token()
     if not aispeech.token:
         print("Eerrr: get token, please wait a moment")
-        exit(1)
+        # exit(1)
     url = WSURL + aispeech.token
     #init ars websocket
     asr_websocket = AiSpeechWebSocket(url,request_body_json)
@@ -226,7 +228,7 @@ def main(fun_socket_send):
             expireTime = aispeech.update_token()
             if not aispeech.token:
                 print("Eerrr: get token, please wait a moment")
-                exit(1)
+                # exit(1)
             asr_websocket.url = WSURL + aispeech.token
         time.sleep(0.01)
 
