@@ -32,6 +32,18 @@ class tfliteInference:
         # Save the results.
         mesh = self.interpreter.get_tensor(self.output_details[0]["index"])[0]
         return mesh
+    
+    def get_weight(self, data):
+        # weight = self.run(data)
+        weight = []
+        for i in range(data.shape[0]): 
+            data_temp = data[i].astype(np.float32)
+            # data_temp = data_temp.reshape((32,64,1))
+            output = self.run(data_temp).reshape((1,-1))
+            weight.extend(output)
+            # import pdb; pdb.set_trace()
+        return (np.array(weight))
+
 
 if __name__ == "__main__":
     tflitepath = './output4_6/models/Audio2Face.tflite'
@@ -45,16 +57,20 @@ if __name__ == "__main__":
     data = np.load(os.path.join('./lpc/1114_2_06.npy'))
     print(data.shape)
 
-    weight = []
-    for i in range(100): #data.shape[0]
-        data_temp = data[i]
-        data_temp = data_temp.reshape((32,64,1)).astype(np.float32)
-        output = inference.run(data_temp)
-        weight.extend(output)
-    weight = np.array(weight)
+    weight = inference.get_weight(data[:20])
+
     print(weight.shape)
 
-    # Set numpy unlimited write
-    np.set_printoptions(threshold=np.inf)
-    with open('./output4_6/weight.txt', 'w') as f:
-        f.write(f"{str(weight)}")
+    # weight = []
+    # for i in range(100): #data.shape[0]
+    #     data_temp = data[i]
+    #     data_temp = data_temp.reshape((32,64,1)).astype(np.float32)
+    #     output = inference.run(data_temp)
+    #     weight.extend(output)
+    # weight = np.array(weight)
+    # print(weight.shape)
+
+    # # Set numpy unlimited write
+    # np.set_printoptions(threshold=np.inf)
+    # with open('./output4_6/weight.txt', 'w') as f:
+    #     f.write(f"{str(weight)}")
