@@ -6,10 +6,10 @@ import scipy.io.wavfile as wavfile
 from ctypes import *
 # import time
 
-dll = cdll.LoadLibrary(r'D:\voice2face\voice2face_v3_1015\step3_train\LPC.dll')
-wav_path = r'D:\voice2face\voice2face_v3_1015\step3_train\wav\1015_3_16.wav' #音频路径
-save_path = r'D:\voice2face\voice2face_v3_1015\step3_train\lpc\lpc_1015_3_16.npy' #保存LPC处理后的数组
-wav_path = "G:/5.wav"
+dll = cdll.LoadLibrary(r'./LPC.dll')
+wav_path = r'./wav/1015_3_16.wav' #音频路径
+save_path = r'./lpc/1015_3_16.npy' #保存LPC处理后的数组
+wav_path = "./5.wav"
 
 def audioProcess(wav_path):
 	# 读取wav文件，存入list
