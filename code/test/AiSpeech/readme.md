@@ -14,7 +14,7 @@ zsmeif_py
 
 
 aispeech_config.json
-
+```json
 "config":{
     "print":true, 是否显示输出打印，true打印，false不打印
     "session":10000, 对话识别id，
@@ -35,7 +35,7 @@ aispeech_config.json
         "audio": {"audioType": "wav","sampleRate": 16000,"channel": 1,"sampleBytes":2},
         "dialog":{"productId":914008290}
         },   ws请求头参数表
-
+```
 
 1，参考 aispeech会话精灵参考文档 https://help.tgenie.cn/#/ba_asr_websocket
 

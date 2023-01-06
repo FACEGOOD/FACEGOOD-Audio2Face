@@ -12,10 +12,11 @@
         "tensorflow":{"cpu":2,"frames":20}
     },
     "api_key":{
-        "productId":"914008290",
-        "publicKey":"c315edc2bab941cbae6a3591a06281bc",
-        "secretKey":"81D620703D63A63A200AEB94125FBAFB",
-        "productIdChat":"914008349",
+        "productId":"914020983",
+        "publicKey":"fdb62e64451143cc8262e160d0dea26e",
+        "secretKey":"3F5C03F6DD84D8AD221C887957CCA07D",
+        "productIdChat":"914020983",
+
         "speaker":"zsmeif"
     },
     "api_token":{
