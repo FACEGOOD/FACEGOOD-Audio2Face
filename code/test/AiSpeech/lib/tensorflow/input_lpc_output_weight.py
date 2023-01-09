@@ -22,7 +22,7 @@ class WeightsAnimation:
     '''
     def __init__(self, model_path, pb_model_path=None):
         self.model_path = model_path
-        if pb_model_path is not None:
+        if not os.path.exists(model_path):
             self.convert_to_tflite(pb_model_path)
         # Load the model
         self.interpreter = tf.lite.Interpreter(model_path=model_path, num_threads=8)
@@ -38,12 +38,12 @@ class WeightsAnimation:
         tflite_model = converter.convert()
         with open(self.model_path, "wb") as f:
             f.write(tflite_model)
+        print(f'Save TFLite model to {self.model_path} successfully!')
 
 
     def run(self, inputData):
         # Preprocess the image before sending to the network.
         inputData = np.expand_dims(inputData, axis=0)
-        
         # The actual detection.
         self.interpreter.set_tensor(self.input_details[0]["index"], inputData)
         self.interpreter.invoke()
@@ -52,15 +52,16 @@ class WeightsAnimation:
         return mesh
     
     
-    def get_weight(self, data):
+    def get_weight(self, data, label_len=37):
         frame_num = data.shape[0]
-        weight = []
+        weight = np.zeros((frame_num, label_len), dtype=np.float32)
         for i in range(frame_num): 
             # print(f"frame is {i}")
             data_temp = data[i].astype(np.float32)
+            # import pdb; pdb.set_trace()
             output = self.run(data_temp).reshape((1,-1))
-            weight.extend(output)
-        return np.array(weight)
+            weight[i] = output
+        return weight
 
 
 if __name__ == "__main__":
