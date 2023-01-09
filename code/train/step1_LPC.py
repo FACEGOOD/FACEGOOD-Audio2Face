@@ -56,8 +56,9 @@ def audioProcess(wav_path):
     rate_kHz = int(rate / 1000)  # 采样率：48kHz
 
     # 分割音频
-    audio_frames = [signal[int(i * frames_step * rate_kHz): int((i * frames_step + chunks_length * 2) * rate_kHz)]
-                    for i in range(audio_frameNum)]
+    audio_frames = [signal[int(i * frames_step * rate_kHz): 
+                            int((i * frames_step + chunks_length * 2) * rate_kHz)]
+                                for i in range(audio_frameNum)]
     inputData_array = np.zeros(shape=(1, 32, 64))  # 创建一个空3D数组，该数组(1*32*64)最后需要删除
 
     for i in range(len(audio_frames)):
