@@ -9,7 +9,7 @@
         "server":{"ip":"127.0.0.1","port":43015},
         "client":{"ip":"127.0.0.1","port":43014},
         "ue4":{"recv_size":1024,"begin":"1","end":"2"},
-        "tensorflow":{"cpu":2,"frames":20}
+        "tensorflow":{"cpu":1,"frames":20}
     },
     "api_key":{
         "productId":"914020983",
@@ -33,12 +33,12 @@
         "speech_text":"speech_text",
         "url":"ws://api.tgenie.cn/runtime/v3/recognize?res=comm&productId=",
         "res":"comm",
-        "productId":"914008290",
+        "productId":"914020983",
         "token":"a616baa5-c203-4b0f-8cd0-1cd7418d734d",
 
         "request_body_first": {"asr":{"res": "comm","lmid":"914008290_DuanPianJie_20191126","enablePunctuation": true,"language": "zh-CN"},
                 "audio": {"audioType": "wav","sampleRate": 16000,"channel": 1,"sampleBytes":2},
-                "dialog":{"productId":914008290}
+                "dialog":{"productId":914020983}
                 },
         "request_body_second":"file",
         "request_body_third":""
