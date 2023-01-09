@@ -71,7 +71,7 @@ ADDR_BIND = (AiSpeechConfig['config']['server']['ip'],AiSpeechConfig['config']['
 ADDR_SEND = (AiSpeechConfig['config']['client']['ip'],AiSpeechConfig['config']['client']['port'])
 
 ue4.BUFF_SIZE = AiSpeechConfig['config']['ue4']['recv_size']
-ue4.RECORDING = True
+ue4.RECORDING = False
 ue4.RECORDING_BEGIN = AiSpeechConfig['config']['ue4']['begin'].encode('utf-8')
 ue4.RECORDING_END = AiSpeechConfig['config']['ue4']['end'].encode('utf-8')
 
@@ -101,8 +101,8 @@ from lib.audio.api_audio import AudioRecognition, AudioPlay
 from lib.tensorflow.input_wavdata_output_lpc import c_lpc, get_audio_frames
 from lib.tensorflow.input_lpc_output_weight import WeightsAnimation
 
-tflitepath = './models/Audio2Face.tflite'
-model_path = './models/Audio2Face'
+tflitepath = './best_model/Audio2Face.tflite'
+model_path = './best_model/Audio2Face'
 #load tensorflow pb model file
 pb_weights_animation = WeightsAnimation(tflitepath, model_path)
 get_weight = pb_weights_animation.get_weight
@@ -112,13 +112,14 @@ get_weight = pb_weights_animation.get_weight
 # use to deal with audio data to lpc data ,and input lpc data to get weights.
 def worker(q_input, q_output, i):
     print("the cpus number is:", i)
+    cnt = 0
     while True:
         input_data = q_input.get()
         for output_wav in input_data:
             # audio frame to lpc datas
             output_lpc = c_lpc(output_wav)
             #lpc data to weights
-            output_data = get_weight(output_lpc)
+            output_data = get_weight(output_lpc,label_len= len(var_bs_index))
             # 赋值
             weights = np.zeros((output_data.shape[0],BS_CONUNT))
             # print(weights.shape)
@@ -131,7 +132,8 @@ def worker(q_input, q_output, i):
                 weights1[:,i] = weights[:,bs_name_index[i]]
 
             q_output.put(weights1)
-
+        print(cnt)
+        cnt += 1
 
 # *******************************************
 import threading
@@ -256,6 +258,7 @@ def main(fun_socket_send):
                 get_time = time.time()
             # get answer text from asr
             text = asr_websocket.get_text_from_ws_asr()
+            print(f'Text: {text}')
             if info_print:
                 print("asr time:",time.time()-get_time)
             r_asr_websocket = json.loads(text)
