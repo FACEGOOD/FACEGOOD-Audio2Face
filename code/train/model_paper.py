@@ -81,14 +81,16 @@ class ArticulationLayer(Model):
         self.kernels_size = kernels_size
         self.emotion_strides = emotion_strides
         self.conv2d_strides = conv2d_strides
+        
+        self.emotion = tf.random.normal([1, 1, 64, self.E], mean=0.0, stddev=1.0)
 
-        self.emotion = conv2d_layer(self.E, [3, 1], [32, 1])
         self.articulation_layer = []
         for i in range(len(self.kernels_size)):
             self.articulation_layer.append([conv2d_layer(256, self.kernels_size[i], self.conv2d_strides[i]),
-                                            conv2d_layer(self.E, [1, 3], self.emotion_strides[i])])
+                                            conv2d_layer(self.E, self.kernels_size[i], self.emotion_strides[i])])
+
     def call(self, x):
-        emotion_input = self.emotion(x)
+        emotion_input = tf.tile(self.emotion, [tf.shape(x)[0], 1, 1, 1])
         for i in range(len(self.kernels_size)):
             conv_x = self.articulation_layer[i][0](x)
             emotion_x = self.articulation_layer[i][1](emotion_input)
@@ -105,10 +107,10 @@ class OutputLayer(Model):
     def __init__(self, output_size, keep_pro):
         super(OutputLayer, self).__init__()
         self.output_layer = models.Sequential([
-            # Flatten(),
-            Dense(units=150, activation=None),
+            Flatten(),
+            Dense(units=150, activation='linear'),
             Dropout(keep_pro),
-            Dense(units=output_size, activation=None)
+            Dense(units=output_size, activation='linear')
         ])
     def call(self, x):
         return self.output_layer(x)
@@ -122,9 +124,10 @@ class Audio2Face(Model):
     def __init__(self, output_size, keep_pro):
         super(Audio2Face, self).__init__()
         self.output_size = output_size
+        self.keep_pro = keep_pro
         self.FormantLayer = FormantLayer()
         self.ArticulationLayer = ArticulationLayer()
-        self.OutputLayer = OutputLayer(self.output_size, keep_pro)
+        self.OutputLayer = OutputLayer(self.output_size, self.keep_pro)
         
     def call(self, x):
         x = self.FormantLayer(x)
