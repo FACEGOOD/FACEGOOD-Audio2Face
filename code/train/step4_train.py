@@ -136,11 +136,11 @@ if __name__ == '__main__':
     dataSet = 'dataSet4_6'
 
     # Training Parameters
-    EPOCHS = 50    # The number of epochs to train the model
+    EPOCHS = 200    # The number of epochs to train the model
     CKPT_EPOCHS = 0 # The epoch to restore the model
     
     test_freq = 10  # Test the model every test_freq epochs
-    save_freq = 50  # Save the model every save_freq epochs
+    save_freq = 10  # Save the model every save_freq epochs
     batch_size = 32 # Batch size
     initial_learning_rate = 0.001   # Initial learning rate
 
