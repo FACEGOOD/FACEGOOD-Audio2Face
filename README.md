@@ -8,6 +8,8 @@
 ![ue](rsc/ue.png)
 
 
+![video](https://github.com/FACEGOOD/FACEGOOD-Audio2Face/blob/main/rsc/Untitled.mp4)
+
 We create a project that transforms audio to blendshape weights,and drives the digital human,xiaomei,in UE project.
 
 
