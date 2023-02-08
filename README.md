@@ -10,7 +10,11 @@
 
 the case video
 [video](https://youtu.be/g28pvNaxN0I)
-[![Watch the video](https://github.com/FACEGOOD/FACEGOOD-Audio2Face/blob/main/rsc/audio2face_proj.mp4_20230208_133303.826.png)](https://youtu.be/g28pvNaxN0I)
+https://user-images.githubusercontent.com/11623487/217445125-41ccc812-d93c-4789-b93a-73b1a008d821.mp4
+[high resolution](https://youtu.be/g28pvNaxN0I) 
+
+
+
 
 
 We create a project that transforms audio to blendshape weights,and drives the digital human,xiaomei,in UE project.
